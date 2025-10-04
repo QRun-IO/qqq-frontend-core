@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AxiosError, AxiosResponse} from "axios";
+import {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import FormData from "form-data";
 import {QException} from "../exceptions/QException";
 import {QAuthenticationMetaData} from "../model/metaData/QAuthenticationMetaData";
@@ -783,13 +783,15 @@ export class QController
             }
          }
 
+         const axiosConfigExtras: AxiosRequestConfig = {};
          if (dontGoAsyncOnBackend)
          {
             formDataOrQueryString.append("_qStepTimeoutMillis", 300 * 1000);
+            axiosConfigExtras.timeout = 300 * 1000;
          }
 
          return this.axiosInstance
-            .post(url, formDataOrQueryString, {headers: formDataHeaders})
+            .post(url, formDataOrQueryString, {headers: formDataHeaders, ...axiosConfigExtras})
             .then((response: AxiosResponse) =>
             {
                const responseObject = this.parseProcessResponse(response);
