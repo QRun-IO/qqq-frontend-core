@@ -901,7 +901,7 @@ export class QController
 
 
    /*******************************************************************************
-    ** Fetch the data for a specific widget.
+    ** Fetch the data about variants for a table
     *******************************************************************************/
    async tableVariants(tableName: string): Promise<QTableVariant[]>
    {
@@ -964,7 +964,7 @@ export class QController
             for (let pair of params.split("&"))
             {
                let [name, value] = pair.split("=");
-               postBody.append(name, value);
+               postBody.append(name, decodeURIComponent(value));
             }
          }
       }
