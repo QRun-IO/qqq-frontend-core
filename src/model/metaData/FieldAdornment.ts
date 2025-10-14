@@ -53,4 +53,25 @@ export class FieldAdornment
       }
       return (null);
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): FieldAdornment
+   {
+      const valuesClone = this.values ? new Map<string, any>() : undefined;
+      if(this.values && valuesClone)
+      {
+         this.values.forEach((value, key) =>
+         {
+            valuesClone.set(key, value);
+         });
+      }
+
+      const clone = new FieldAdornment({
+         ...this,
+         values: valuesClone
+      });
+      return (clone);
+   }
 }

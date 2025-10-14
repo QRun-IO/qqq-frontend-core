@@ -45,4 +45,25 @@ export class QExposedJoin
          this.joinPath.push(new QJoinMetaData(object.joinPath[i]));
       }
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QExposedJoin
+   {
+      const joinTableClone = (this.joinTable as any).clone();
+
+      const joinPathClone: QJoinMetaData[] = [];
+      for (let joinMetaData of this.joinPath)
+      {
+         joinPathClone.push((joinMetaData as any).clone());
+      }
+
+      const clone = new QExposedJoin({
+         ...this,
+         joinTable: joinTableClone,
+         joinPath: joinPathClone
+      });
+      return (clone);
+   }
 }

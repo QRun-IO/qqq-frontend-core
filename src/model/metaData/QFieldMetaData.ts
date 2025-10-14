@@ -135,4 +135,59 @@ export class QFieldMetaData
       return (null);
    }
 
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QFieldMetaData
+   {
+      const inlinePossibleValueSourceClone: QPossibleValue[] | undefined = this.inlinePossibleValueSource ? [] : undefined;
+      if(this.inlinePossibleValueSource && inlinePossibleValueSourceClone)
+      {
+         for (let qPossibleValue of this.inlinePossibleValueSource)
+         {
+            inlinePossibleValueSourceClone.push((qPossibleValue as any).clone());
+         }
+      }
+
+      const adornmentsClone: FieldAdornment[] | undefined = this.adornments ? [] : undefined;
+      if(this.adornments && adornmentsClone)
+      {
+         for (let adornment of this.adornments)
+         {
+            adornmentsClone.push((adornment as any).clone());
+         }
+      }
+
+      const helpContentsClone: QHelpContent[] | undefined = this.helpContents ? [] : undefined;
+      if(this.helpContents && helpContentsClone)
+      {
+         for (let helpContent of this.helpContents)
+         {
+            helpContentsClone.push((helpContent as any).clone());
+         }
+      }
+
+      const behaviorsClone: any[] | undefined = this.behaviors ? [...this.behaviors] : undefined;
+
+      const supplementalFieldMetaDataClone: Map<String, any> = new Map();
+      this.supplementalFieldMetaData.forEach((value, key) =>
+      {
+         supplementalFieldMetaDataClone.set(key, value);
+      });
+
+      const possibleValueSourceFilterClone = this.possibleValueSourceFilter ? (this.possibleValueSourceFilter as any).clone() : undefined;
+
+      const clone = new QFieldMetaData({
+         ...this,
+         inlinePossibleValueSource: inlinePossibleValueSourceClone,
+         adornments: adornmentsClone,
+         helpContents: helpContentsClone,
+         behaviors: behaviorsClone,
+         supplementalFieldMetaData: supplementalFieldMetaDataClone,
+         possibleValueSourceFilter: possibleValueSourceFilterClone
+      });
+      return (clone);
+   }
+
 }

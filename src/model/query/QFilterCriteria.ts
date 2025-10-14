@@ -38,4 +38,18 @@ export class QFilterCriteria
       this.operator = operator;
       this.values = values;
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QFilterCriteria
+   {
+      const clone = new QFilterCriteria(
+         this.fieldName,
+         this.operator,
+         [...this.values]
+      );
+      clone.otherFieldName = this.otherFieldName;
+      return (clone);
+   }
 }

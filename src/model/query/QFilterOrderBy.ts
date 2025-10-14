@@ -33,4 +33,16 @@ export class QFilterOrderBy
       this.fieldName = fieldName;
       this.isAscending = isAscending;
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QFilterOrderBy
+   {
+      const clone = new QFilterOrderBy(
+         this.fieldName,
+         this.isAscending
+      );
+      return (clone);
+   }
 }
