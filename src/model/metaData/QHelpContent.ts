@@ -116,10 +116,13 @@ export class QHelpContent
          rolesClone.add(role);
       });
 
-      const clone = new QHelpContent({
-         ...this,
-         roles: rolesClone
-      });
+      const clone = new QHelpContent({...this});
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // sets don't quite work as expected for this kind of clone, so copy manually //
+      ////////////////////////////////////////////////////////////////////////////////
+      clone.roles = rolesClone
+
       return (clone);
    }
 

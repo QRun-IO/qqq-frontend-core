@@ -119,16 +119,16 @@ export class QTableMetaData
    public clone(): QTableMetaData
    {
       const fieldsClone = this.fields ? new Map() : undefined;
-      if(this.fields && fieldsClone)
+      if (this.fields && fieldsClone)
       {
          this.fields.forEach((field, name) =>
          {
             fieldsClone.set(name, field.clone());
-         })
+         });
       }
 
       const sectionsClone: QTableSection[] | undefined = this.sections ? [] : undefined;
-      if(this.sections && sectionsClone)
+      if (this.sections && sectionsClone)
       {
          for (let section of this.sections)
          {
@@ -137,7 +137,7 @@ export class QTableMetaData
       }
 
       const exposedJoinsClone: QExposedJoin[] | undefined = this.exposedJoins ? [] : undefined;
-      if(this.exposedJoins && exposedJoinsClone)
+      if (this.exposedJoins && exposedJoinsClone)
       {
          for (let exposedJoin of this.exposedJoins)
          {
@@ -145,8 +145,8 @@ export class QTableMetaData
          }
       }
 
-      const capabilitiesClone = this.capabilities ? new Set() : undefined;
-      if(this.capabilities && capabilitiesClone)
+      const capabilitiesClone = new Set<string>();
+      if (this.capabilities && capabilitiesClone)
       {
          this.capabilities.forEach((capability) =>
          {
@@ -155,31 +155,30 @@ export class QTableMetaData
       }
 
       const helpContentsClone = this.helpContent ? new Map() : undefined;
-      if(this.helpContent && helpContentsClone)
+      if (this.helpContent && helpContentsClone)
       {
          this.helpContent.forEach((helpContentArray, name) =>
          {
-            if(helpContentArray)
+            if (helpContentArray)
             {
                const helpContentArrayClone: QHelpContent[] = [];
                for (let qHelpContent of helpContentArray)
                {
-                  helpContentArrayClone.push((qHelpContent as any).clone())
+                  helpContentArrayClone.push((qHelpContent as any).clone());
                }
                helpContentsClone.set(name, helpContentArrayClone);
             }
          });
       }
 
-      const clone = new QTableMetaData({
-         ...this,
-         fields: fieldsClone,
-         sections: sectionsClone,
-         exposedJoins: exposedJoinsClone,
-         capabilities: capabilitiesClone,
-         supplementalTableMetaData: new Map(this.supplementalTableMetaData),
-         helpContent: helpContentsClone
-      });
+      const clone = new QTableMetaData({...this});
+      clone.fields = fieldsClone;
+      clone.sections = sectionsClone;
+      clone.exposedJoins = exposedJoinsClone;
+      clone.capabilities = capabilitiesClone;
+      clone.supplementalTableMetaData = new Map(this.supplementalTableMetaData);
+      clone.helpContent = helpContentsClone;
+
       return (clone);
    }
 
