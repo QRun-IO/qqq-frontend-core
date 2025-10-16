@@ -181,12 +181,13 @@ export class QFieldMetaData
       const clone = new QFieldMetaData({
          ...this,
          inlinePossibleValueSource: inlinePossibleValueSourceClone,
-         adornments: adornmentsClone,
          helpContents: helpContentsClone,
          behaviors: behaviorsClone,
-         supplementalFieldMetaData: supplementalFieldMetaDataClone,
          possibleValueSourceFilter: possibleValueSourceFilterClone
       });
+
+      clone.adornments = adornmentsClone;
+      clone.supplementalFieldMetaData = supplementalFieldMetaDataClone;
       return (clone);
    }
 
