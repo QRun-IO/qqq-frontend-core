@@ -107,4 +107,47 @@ export class QQueryFilter
       }
       this.subFilters.push(subFilter);
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QQueryFilter
+   {
+      const criteriaClone: QFilterCriteria[] | undefined = this.criteria ? [] : undefined;
+      if(this.criteria && criteriaClone)
+      {
+         for (let criteria of this.criteria)
+         {
+            criteriaClone.push((criteria as any).clone());
+         }
+      }
+
+      const orderBysClone: QFilterOrderBy[] | undefined = this.orderBys ? [] : undefined;
+      if(this.orderBys && orderBysClone)
+      {
+         for (let orderBy of this.orderBys)
+         {
+            orderBysClone.push((orderBy as any).clone());
+         }
+      }
+
+      const subFiltersClone: QQueryFilter[] | undefined = this.subFilters ? [] : undefined;
+      if(this.subFilters && subFiltersClone)
+      {
+         for (let subFilter of this.subFilters)
+         {
+            subFiltersClone.push((subFilter as any).clone());
+         }
+      }
+
+      const clone = new QQueryFilter(
+         criteriaClone,
+         orderBysClone,
+         subFiltersClone,
+         this.booleanOperator,
+         this.skip,
+         this.limit
+      );
+      return (clone);
+   }
 }

@@ -111,4 +111,77 @@ export class QTableMetaData
 
       this.helpContent = QHelpContent.buildMap(object.helpContents);
    }
+
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QTableMetaData
+   {
+      const fieldsClone = this.fields ? new Map() : undefined;
+      if(this.fields && fieldsClone)
+      {
+         this.fields.forEach((field, name) =>
+         {
+            fieldsClone.set(name, field.clone());
+         })
+      }
+
+      const sectionsClone: QTableSection[] | undefined = this.sections ? [] : undefined;
+      if(this.sections && sectionsClone)
+      {
+         for (let section of this.sections)
+         {
+            sectionsClone.push((section as any).clone());
+         }
+      }
+
+      const exposedJoinsClone: QExposedJoin[] | undefined = this.exposedJoins ? [] : undefined;
+      if(this.exposedJoins && exposedJoinsClone)
+      {
+         for (let exposedJoin of this.exposedJoins)
+         {
+            exposedJoinsClone.push((exposedJoin as any).clone());
+         }
+      }
+
+      const capabilitiesClone = this.capabilities ? new Set() : undefined;
+      if(this.capabilities && capabilitiesClone)
+      {
+         this.capabilities.forEach((capability) =>
+         {
+            capabilitiesClone.add(capability);
+         });
+      }
+
+      const helpContentsClone = this.helpContent ? new Map() : undefined;
+      if(this.helpContent && helpContentsClone)
+      {
+         this.helpContent.forEach((helpContentArray, name) =>
+         {
+            if(helpContentArray)
+            {
+               const helpContentArrayClone: QHelpContent[] = [];
+               for (let qHelpContent of helpContentArray)
+               {
+                  helpContentArrayClone.push((qHelpContent as any).clone())
+               }
+               helpContentsClone.set(name, helpContentArrayClone);
+            }
+         });
+      }
+
+      const clone = new QTableMetaData({
+         ...this,
+         fields: fieldsClone,
+         sections: sectionsClone,
+         exposedJoins: exposedJoinsClone,
+         capabilities: capabilitiesClone,
+         supplementalTableMetaData: new Map(this.supplementalTableMetaData),
+         helpContent: helpContentsClone
+      });
+      return (clone);
+   }
+
+
 }

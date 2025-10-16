@@ -60,4 +60,25 @@ export class QTableSection
       this.helpContents = QHelpContent.buildArray(object.helpContents)
    }
 
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QTableSection
+   {
+      const helpContentsClone: QHelpContent[] = (this.helpContents ? [] : undefined) as QHelpContent[];
+      if(this.helpContents && helpContentsClone)
+      {
+         for (let helpContent of this.helpContents)
+         {
+            helpContentsClone.push((helpContent as any).clone());
+         }
+      }
+
+      const clone = new QTableSection({
+         ...this,
+         helpContents: helpContentsClone
+      });
+      return (clone);
+   }
+
 }
