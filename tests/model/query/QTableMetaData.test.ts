@@ -91,17 +91,28 @@ describe("QTableMetaData tests", () =>
                   "isHidden": false,
                   "gridColumns": -1,
                   "displayFormat": "%s",
-                  "adornments": [
-                     {
-                        "type": "REVEAL"
-                     }
-                  ],
                   "helpContents": [
                      {
                         "content": "Field Help",
                         "format": "MARKDOWN",
                         "roles": ["WRITE_SCREENS"],
                         "contentAsHtml": "Field Help"
+                     }
+                  ],
+                  "supplementalFieldMetaData": {
+                     "materialDashboard": {
+                        "formAdjusterIdentifier": "table:connection;field:externalSystemId",
+                        "onChangeFormAdjuster": {
+                           "name": "com.coldtrack.live.tables.setup.customizers.ConnectionTableMetaDataAdjuster",
+                           "codeType": "JAVA"
+                        },
+                        "type": "materialDashboard"
+                     }
+                  },
+                  "adornments": [
+                     {
+                        "type": "LINK",
+                        "values": {"toRecordFromTable": "foreignTable"}
                      }
                   ]
                },
@@ -195,9 +206,22 @@ describe("QTableMetaData tests", () =>
       expect(cloneTable.sections?.[0].name).toEqual(table.sections?.[0].name);
 
       expect(cloneTable.capabilities.size).toEqual(table.capabilities.size);
+
       expect(cloneTable.helpContent?.size).toEqual(table.helpContent?.size);
       expect(cloneTable.helpContent?.get("key")?.[0].roles.size).not.toEqual(0);
       expect(cloneTable.helpContent?.get("key")?.[0].roles.size).toEqual(table.helpContent?.get("key")?.[0].roles.size);
+
+      expect(cloneTable.supplementalTableMetaData.size).not.toEqual(0);
+      expect(cloneTable.supplementalTableMetaData.size).toEqual(table.supplementalTableMetaData.size);
+
+      const apiKeyField = table.fields?.get("apiKey");
+      const cloneApiKeyField = cloneTable.fields?.get("apiKey");
+      expect(cloneApiKeyField?.supplementalFieldMetaData.size).not.toEqual(0);
+      expect(cloneApiKeyField?.supplementalFieldMetaData.size).toEqual(apiKeyField?.supplementalFieldMetaData.size);
+      expect(cloneApiKeyField?.adornments?.length).not.toEqual(0);
+      expect(cloneApiKeyField?.adornments?.length).toEqual(apiKeyField?.adornments?.length);
+      expect(cloneApiKeyField?.adornments?.[0].values?.size).not.toEqual(0);
+      expect(cloneApiKeyField?.adornments?.[0].values?.size).toEqual(apiKeyField?.adornments?.[0].values?.size);
 
       ///////////////////////////////////////////////////////////////////////////////////////////
       // change some things in the clone - assert that they are then not equal to the original //

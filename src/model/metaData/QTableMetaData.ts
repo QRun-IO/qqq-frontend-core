@@ -171,12 +171,18 @@ export class QTableMetaData
          });
       }
 
+      const supplementalTableMetaDataClone = new Map<String, any>();
+      this.supplementalTableMetaData.forEach((value, name) =>
+      {
+         supplementalTableMetaDataClone.set(name, Object.assign({}, value));
+      });
+
       const clone = new QTableMetaData({...this});
       clone.fields = fieldsClone;
       clone.sections = sectionsClone;
       clone.exposedJoins = exposedJoinsClone;
       clone.capabilities = capabilitiesClone;
-      clone.supplementalTableMetaData = new Map(this.supplementalTableMetaData);
+      clone.supplementalTableMetaData = supplementalTableMetaDataClone;
       clone.helpContent = helpContentsClone;
 
       return (clone);

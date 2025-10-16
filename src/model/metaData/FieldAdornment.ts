@@ -68,10 +68,8 @@ export class FieldAdornment
          });
       }
 
-      const clone = new FieldAdornment({
-         ...this,
-         values: valuesClone
-      });
+      const clone = new FieldAdornment({type: this.type});
+      clone.values = valuesClone;
       return (clone);
    }
 }
