@@ -20,6 +20,7 @@
  */
 
 
+import {QHelpContent} from "../../../src/model/metaData/QHelpContent";
 import {QTableMetaData} from "../../../src/model/metaData/QTableMetaData";
 
 describe("QTableMetaData tests", () =>
@@ -94,6 +95,14 @@ describe("QTableMetaData tests", () =>
                      {
                         "type": "REVEAL"
                      }
+                  ],
+                  "helpContents": [
+                     {
+                        "content": "Field Help",
+                        "format": "MARKDOWN",
+                        "roles": ["WRITE_SCREENS"],
+                        "contentAsHtml": "Field Help"
+                     }
                   ]
                },
                "type": {
@@ -162,7 +171,17 @@ describe("QTableMetaData tests", () =>
             "editPermission": true,
             "deletePermission": true,
             "usesVariants": false,
-            "iconName": "link"
+            "iconName": "link",
+            "helpContents": {
+               "key": [
+                  {
+                     "content": "Table Help",
+                     "format": "MARKDOWN",
+                     "roles": ["WRITE_SCREENS"],
+                     "contentAsHtml": "Table Help"
+                  }
+               ]
+            }
          });
 
       ////////////////////////////////////////////////////////////////
@@ -175,19 +194,43 @@ describe("QTableMetaData tests", () =>
       expect(cloneTable.sections?.length).toEqual(table.sections?.length);
       expect(cloneTable.sections?.[0].name).toEqual(table.sections?.[0].name);
 
+      expect(cloneTable.capabilities.size).toEqual(table.capabilities.size);
+      expect(cloneTable.helpContent?.size).toEqual(table.helpContent?.size);
+      expect(cloneTable.helpContent?.get("key")?.[0].roles.size).not.toEqual(0);
+      expect(cloneTable.helpContent?.get("key")?.[0].roles.size).toEqual(table.helpContent?.get("key")?.[0].roles.size);
+
       ///////////////////////////////////////////////////////////////////////////////////////////
       // change some things in the clone - assert that they are then not equal to the original //
       ///////////////////////////////////////////////////////////////////////////////////////////
-      cloneTable.name = "changed"
+      cloneTable.name = "changed";
       expect(cloneTable.name).not.toEqual(table.name);
-      if(cloneTable.sections)
+      if (cloneTable.sections)
       {
-         cloneTable.sections[0].name = "changed"
+         cloneTable.sections[0].name = "changed";
          cloneTable.sections[0].isHidden = true;
       }
 
       expect(cloneTable.sections?.[0].name).not.toEqual(table.sections?.[0].name);
       expect(cloneTable.sections?.[0].isHidden).not.toEqual(table.sections?.[0].isHidden);
+
+      cloneTable.capabilities.delete("TABLE_COUNT");
+      expect(cloneTable.capabilities.size).not.toEqual(table.capabilities.size);
+
+      if(cloneTable.helpContent && table.helpContent) // avoid possibly-undef and ?. on left-hand sides below
+      {
+         cloneTable.helpContent.set("key2", []);
+         expect(cloneTable.helpContent.size).not.toEqual(table.helpContent.size);
+
+         cloneTable.helpContent.get("key")?.push(new QHelpContent({}));
+         expect(cloneTable.helpContent.get("key")?.length).not.toEqual(table.helpContent.get("key")?.length);
+
+         cloneTable.helpContent.get("key")?.[0].roles.add("READ_SCREENS");
+         expect(cloneTable.helpContent.get("key")?.[0].roles.size).not.toEqual(table.helpContent.get("key")?.[0].roles.size);
+      }
+      else
+      {
+         fail("help content wasn't set in either table or cloneTable (or neither)")
+      }
    });
 
 });
