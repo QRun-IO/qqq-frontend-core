@@ -105,6 +105,7 @@ export class QHelpContent
       return (rs);
    }
 
+
    /***************************************************************************
     *
     ***************************************************************************/
@@ -121,7 +122,7 @@ export class QHelpContent
       ////////////////////////////////////////////////////////////////////////////////
       // sets don't quite work as expected for this kind of clone, so copy manually //
       ////////////////////////////////////////////////////////////////////////////////
-      clone.roles = rolesClone
+      clone.roles = rolesClone;
 
       return (clone);
    }

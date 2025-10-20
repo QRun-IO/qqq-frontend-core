@@ -95,7 +95,7 @@ describe("QTableMetaData tests", () =>
                      {
                         "content": "Field Help",
                         "format": "MARKDOWN",
-                        "roles": ["WRITE_SCREENS"],
+                        "roles": ["READ_SCREENS"],
                         "contentAsHtml": "Field Help"
                      }
                   ],
@@ -204,6 +204,7 @@ describe("QTableMetaData tests", () =>
       expect(cloneTable.sections?.length).toEqual(2);
       expect(cloneTable.sections?.length).toEqual(table.sections?.length);
       expect(cloneTable.sections?.[0].name).toEqual(table.sections?.[0].name);
+      expect(cloneTable.sections?.[0].iconName).toEqual(table.sections?.[0].iconName);
 
       expect(cloneTable.capabilities.size).toEqual(table.capabilities.size);
 
@@ -222,6 +223,11 @@ describe("QTableMetaData tests", () =>
       expect(cloneApiKeyField?.adornments?.length).toEqual(apiKeyField?.adornments?.length);
       expect(cloneApiKeyField?.adornments?.[0].values?.size).not.toEqual(0);
       expect(cloneApiKeyField?.adornments?.[0].values?.size).toEqual(apiKeyField?.adornments?.[0].values?.size);
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+      // turns out toEqual will do a deep equality test, so, we could have just done this all along //
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+      expect(cloneTable).toEqual(table);
 
       ///////////////////////////////////////////////////////////////////////////////////////////
       // change some things in the clone - assert that they are then not equal to the original //
