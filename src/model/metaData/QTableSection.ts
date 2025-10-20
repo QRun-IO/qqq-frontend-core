@@ -46,7 +46,7 @@ export class QTableSection
       this.name = object.name;
       this.label = object.label;
       this.tier = object.tier;
-      this.iconName = object.icon ? object.icon.name : null;
+      this.iconName = object.icon ? object.icon.name : object.iconName;
 
       if (object.fieldNames)
       {
