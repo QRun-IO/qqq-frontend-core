@@ -79,7 +79,37 @@ describe("QTableMetaData tests", () =>
                            "toRecordFromTable": "client"
                         }
                      }
-                  ]
+                  ],
+                  "possibleValueSourceFilter": {
+                     "criteria": [
+                        {
+                           "fieldName": "isActive",
+                           "operator": "EQUALS",
+                           "values": [
+                              true
+                           ]
+                        }
+                     ],
+                     "booleanOperator": "AND",
+                     "subFilters": [
+                        {
+                           "criteria": [
+                              {
+                                 "fieldName": "clientId",
+                                 "operator": "EQUALS",
+                                 "values": [
+                                    "${input.clientId}"
+                                 ]
+                              },
+                              {
+                                 "fieldName": "clientId",
+                                 "operator": "IS_BLANK"
+                              }
+                           ],
+                           "booleanOperator": "OR"
+                        }
+                     ]
+                  }
                },
                "apiKey": {
                   "name": "apiKey",
@@ -246,7 +276,7 @@ describe("QTableMetaData tests", () =>
       cloneTable.capabilities.delete("TABLE_COUNT");
       expect(cloneTable.capabilities.size).not.toEqual(table.capabilities.size);
 
-      if(cloneTable.helpContent && table.helpContent) // avoid possibly-undef and ?. on left-hand sides below
+      if (cloneTable.helpContent && table.helpContent) // avoid possibly-undef and ?. on left-hand sides below
       {
          cloneTable.helpContent.set("key2", []);
          expect(cloneTable.helpContent.size).not.toEqual(table.helpContent.size);
@@ -259,7 +289,7 @@ describe("QTableMetaData tests", () =>
       }
       else
       {
-         fail("help content wasn't set in either table or cloneTable (or neither)")
+         fail("help content wasn't set in either table or cloneTable (or neither)");
       }
    });
 

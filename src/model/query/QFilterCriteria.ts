@@ -44,10 +44,12 @@ export class QFilterCriteria
     ***************************************************************************/
    public clone(): QFilterCriteria
    {
+      const cloneValues = (this.values === null ? null : this.values === undefined ? undefined : [...this.values]) as any[];
+
       const clone = new QFilterCriteria(
          this.fieldName,
          this.operator,
-         [...this.values]
+         cloneValues
       );
       clone.otherFieldName = this.otherFieldName;
       return (clone);
