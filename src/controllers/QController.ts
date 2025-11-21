@@ -946,9 +946,10 @@ export class QController
     * would return), then, assuming the params are a string (not FormData), then
     * this method will automatically re-try the request as a GET.
     *******************************************************************************/
-   async widget(widgetName: string, params?: string | FormData): Promise<any>
+   async widget(widgetName: string, params?: string | FormData, overrideAbortName?: string): Promise<any>
    {
       let url = `/widget/${encodeURIComponent(widgetName)}`;
+      const abortName = overrideAbortName ?? widgetName;
 
       const paramsAreFormData = params instanceof FormData
       let postBody: FormData;
@@ -972,10 +973,10 @@ export class QController
       /////////////////////////////////////////////////////////////////
       // see if an abort controller was created for this widget name //
       /////////////////////////////////////////////////////////////////
-      let controller = QController.widgetAbortControllerMap.get(widgetName);
+      let controller = QController.widgetAbortControllerMap.get(abortName);
       if (controller)
       {
-         console.log(`Found existing abort controller for widget '${widgetName}', aborting...`);
+         console.log(`Found existing abort controller for widget '${abortName}', aborting...`);
          controller.abort();
       }
 
@@ -984,7 +985,7 @@ export class QController
       /////////////////////////////////////////
       controller = new AbortController();
       const signal = controller.signal;
-      QController.widgetAbortControllerMap.set(widgetName, controller);
+      QController.widgetAbortControllerMap.set(abortName, controller);
 
       return this.axiosInstance
          .post(url, postBody, {signal})
@@ -993,7 +994,7 @@ export class QController
             ///////////////////////////////////////////////////
             // make sure to clear out the request controller //
             ///////////////////////////////////////////////////
-            QController.widgetAbortControllerMap.set(widgetName, null);
+            QController.widgetAbortControllerMap.set(abortName, null);
             return response.data;
          })
          .catch(async (e: any) =>
@@ -1006,7 +1007,7 @@ export class QController
             {
                if(!paramsAreFormData)
                {
-                  return await this.getWidget(widgetName, params);
+                  return await this.getWidget(widgetName, params, overrideAbortName);
                }
                else
                {
@@ -1031,8 +1032,10 @@ export class QController
     * POST body - but this method is here for a backward-compatibility later - in
     * case hitting a backend server that 404'ed for the POST call.
     *******************************************************************************/
-   private async getWidget(widgetName: string, urlParams?: string): Promise<any>
+   private async getWidget(widgetName: string, urlParams?: string, overrideAbortName?: string): Promise<any>
    {
+      const abortName = overrideAbortName ?? widgetName;
+
       let url = `/widget/${encodeURIComponent(widgetName)}`;
       if(urlParams)
       {
@@ -1044,7 +1047,7 @@ export class QController
       /////////////////////////////////////////
       const controller = new AbortController();
       const signal = controller.signal;
-      QController.widgetAbortControllerMap.set(widgetName, controller);
+      QController.widgetAbortControllerMap.set(abortName, controller);
 
       return this.axiosInstance
          .get(url, {signal})
@@ -1053,7 +1056,7 @@ export class QController
             ///////////////////////////////////////////////////
             // make sure to clear out the request controller //
             ///////////////////////////////////////////////////
-            QController.widgetAbortControllerMap.set(widgetName, null);
+            QController.widgetAbortControllerMap.set(abortName, null);
             return response.data;
          })
          .catch((e: any) =>
