@@ -35,6 +35,7 @@ export class QTableMetaData
    isHidden: boolean = false;
    primaryKeyField: string;
    fields?: Map<string, QFieldMetaData>;
+   virtualFields?: Map<string, QFieldMetaData>;
    iconName?: string;
    sections?: QTableSection[];
    exposedJoins?: QExposedJoin[];
@@ -69,6 +70,15 @@ export class QTableMetaData
          for (const key in object.fields)
          {
             this.fields.set(key, new QFieldMetaData(object.fields[key]));
+         }
+      }
+
+      if (object.virtualFields)
+      {
+         this.virtualFields = new Map<string, QFieldMetaData>();
+         for (const key in object.virtualFields)
+         {
+            this.virtualFields.set(key, new QFieldMetaData(object.virtualFields[key]));
          }
       }
 
@@ -127,6 +137,15 @@ export class QTableMetaData
          });
       }
 
+      const virtualFieldsClone = this.virtualFields ? new Map() : undefined;
+      if (this.virtualFields && virtualFieldsClone)
+      {
+         this.virtualFields.forEach((field, name) =>
+         {
+            virtualFieldsClone.set(name, field.clone());
+         });
+      }
+
       const sectionsClone: QTableSection[] | undefined = this.sections ? [] : undefined;
       if (this.sections && sectionsClone)
       {
@@ -179,6 +198,7 @@ export class QTableMetaData
 
       const clone = new QTableMetaData({...this});
       clone.fields = fieldsClone;
+      clone.virtualFields = virtualFieldsClone;
       clone.sections = sectionsClone;
       clone.exposedJoins = exposedJoinsClone;
       clone.capabilities = capabilitiesClone;

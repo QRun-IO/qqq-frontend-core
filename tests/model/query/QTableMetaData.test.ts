@@ -176,7 +176,14 @@ describe("QTableMetaData tests", () =>
                   "tier": "T1",
                   "fieldNames": ["id", "name"],
                   "icon": {"name": "badge"},
-                  "isHidden": false
+                  "isHidden": false,
+                  "alternatives": {
+                     "RECORD_VIEW": {
+                        "name": "identityView",
+                        "label": "Identity",
+                        "fieldNames": ["id", "specialName"]
+                     }
+                  }
                },
                {
                   "name": "authentication",
@@ -235,6 +242,7 @@ describe("QTableMetaData tests", () =>
       expect(cloneTable.sections?.length).toEqual(table.sections?.length);
       expect(cloneTable.sections?.[0].name).toEqual(table.sections?.[0].name);
       expect(cloneTable.sections?.[0].iconName).toEqual(table.sections?.[0].iconName);
+      expect(cloneTable.sections?.[0].alternatives?.size).toEqual(1);
 
       expect(cloneTable.capabilities.size).toEqual(table.capabilities.size);
 
@@ -291,6 +299,13 @@ describe("QTableMetaData tests", () =>
       {
          fail("help content wasn't set in either table or cloneTable (or neither)");
       }
+
+      cloneTable.sections?.[0]?.fieldNames?.push("foobar");
+      expect(cloneTable.sections?.[0]?.fieldNames?.length).not.toEqual(table.sections?.[0]?.fieldNames?.length);
+
+      cloneTable.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.push("another");
+      expect(table.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.length).toEqual(2);
+      expect(cloneTable.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.length).toEqual(3);
    });
 
 });

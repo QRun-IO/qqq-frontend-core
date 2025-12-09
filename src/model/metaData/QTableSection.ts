@@ -36,6 +36,7 @@ export class QTableSection
    isHidden: boolean;
    gridColumns?: number;
    helpContents?: QHelpContent[];
+   alternatives?: Map<string, QTableSection>;
 
 
    /*******************************************************************************
@@ -58,6 +59,15 @@ export class QTableSection
       this.gridColumns = object.gridColumns;
 
       this.helpContents = QHelpContent.buildArray(object.helpContents)
+
+      if (object.alternatives)
+      {
+         this.alternatives = new Map<string, QTableSection>();
+         for (let type in object.alternatives)
+         {
+            this.alternatives.set(type, new QTableSection(object.alternatives[type]));
+         }
+      }
    }
 
    /***************************************************************************
@@ -65,6 +75,12 @@ export class QTableSection
     ***************************************************************************/
    public clone(): QTableSection
    {
+      let fieldNamesClone: string[] | undefined = undefined;
+      if(this.fieldNames)
+      {
+         fieldNamesClone = [...this.fieldNames];
+      }
+
       const helpContentsClone: QHelpContent[] = (this.helpContents ? [] : undefined) as QHelpContent[];
       if(this.helpContents && helpContentsClone)
       {
@@ -74,10 +90,19 @@ export class QTableSection
          }
       }
 
-      const clone = new QTableSection({
-         ...this,
-         helpContents: helpContentsClone
-      });
+      const alternativesClone: Map<string, QTableSection> | undefined = (this.alternatives ? new Map<string, QTableSection> : undefined)
+      if(this.alternatives && alternativesClone)
+      {
+         this.alternatives.forEach((value: QTableSection, key: string) =>
+            alternativesClone.set(key, value.clone()));
+      }
+
+      const clone = new QTableSection({...this});
+
+      clone.fieldNames = fieldNamesClone;
+      clone.helpContents = helpContentsClone;
+      clone.alternatives = alternativesClone;
+
       return (clone);
    }
 
