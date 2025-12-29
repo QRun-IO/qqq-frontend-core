@@ -53,6 +53,9 @@ export class QThemeMetaData
    // Custom CSS
    customCss?: string;
 
+   // Icon style
+   iconStyle?: "filled" | "outlined" | "rounded" | "sharp" | "two-tone";
+
    constructor(object: any)
    {
       this.primaryColor = object.primaryColor;
@@ -73,5 +76,6 @@ export class QThemeMetaData
       this.iconPath = object.iconPath;
       this.faviconPath = object.faviconPath;
       this.customCss = object.customCss;
+      this.iconStyle = object.iconStyle;
    }
 }
