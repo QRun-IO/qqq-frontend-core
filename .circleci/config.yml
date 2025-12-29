@@ -29,8 +29,8 @@ workflows:
 
   publish_feature:
     jobs:
-      - qqq-orb/mvn_publish:
-          context: [qqq-maven-registry-credentials]
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: feature
           filters:
             branches:

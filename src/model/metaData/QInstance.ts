@@ -27,6 +27,7 @@ import {QHelpContent} from "./QHelpContent";
 import {QProcessMetaData} from "./QProcessMetaData";
 import {QReportMetaData} from "./QReportMetaData";
 import {QTableMetaData} from "./QTableMetaData";
+import {QThemeMetaData} from "./QThemeMetaData";
 import {QWidgetMetaData} from "./QWidgetMetaData";
 
 /*******************************************************************************
@@ -42,6 +43,7 @@ export class QInstance
    apps?: Map<string, QAppMetaData>;
    appTree?: QAppTreeNode[];
    branding?: QBrandingMetaData;
+   theme?: QThemeMetaData;
    environmentValues?: Map<string, string>;
    helpContent?: Map<string, QHelpContent[]>;
    supplementalInstanceMetaData: Map<String, any> = new Map();
@@ -121,6 +123,11 @@ export class QInstance
          for (const key in object.supplementalInstanceMetaData)
          {
             this.supplementalInstanceMetaData.set(key, object.supplementalInstanceMetaData[key]);
+         }
+
+         if (object.supplementalInstanceMetaData["theme"])
+         {
+            this.theme = new QThemeMetaData(object.supplementalInstanceMetaData["theme"]);
          }
       }
 
