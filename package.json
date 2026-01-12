@@ -11,7 +11,7 @@
       "clean-and-install": "rm -rf node_modules/ && rm -rf package-lock.json && rm -rf lib/ && npm install",
       "prepublishOnly": "rm -rf lib/ && tsc -p ./ --outDir lib/",
       "test": "jest",
-      "yalc-push": "yalc push --private",
+      "yalc-push": "npm run prepublishOnly && yalc push --private",
       "yalc-watch": "yalc-watch"
    },
    "dependencies": {
