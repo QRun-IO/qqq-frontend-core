@@ -11,3 +11,6 @@ lib
 
 **/.DS_Store
 *.iml
+
+# Claude Code local settings
+.claude/
