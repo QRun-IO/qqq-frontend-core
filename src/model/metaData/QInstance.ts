@@ -47,6 +47,8 @@ export class QInstance
    environmentValues?: Map<string, string>;
    helpContent?: Map<string, QHelpContent[]>;
    supplementalInstanceMetaData: Map<String, any> = new Map();
+   redirects: Map<string, string> = new Map();
+   private pathsMap: Record<string, {path: string, affinity: number}[]> = {};
 
    constructor(object: any)
    {
@@ -132,6 +134,44 @@ export class QInstance
       }
 
       this.helpContent = QHelpContent.buildMap(object.helpContents);
+
+      if (object.redirects)
+      {
+         for (const key in object.redirects)
+         {
+            this.redirects.set(key, object.redirects[key]);
+         }
+      }
+
+      this.buildPathsMap(this.appTree || []);
+   }
+
+
+   /***************************************************************************
+    * populate the private/internal "pathsMap" - with lists of all available
+    * paths to tables, processes, etc (where a table in more than 1 app will
+    * have more than 1 entry).  This is used to help determine which app to
+    * open when a user clicks on a table name.  To select a path, they should
+    * be sorted by affinity, so that the most preferred app is first.
+    ***************************************************************************/
+   buildPathsMap(nodes: QAppTreeNode[], path: string = ""): void
+   {
+      for (let i = 0; i < nodes.length; i++)
+      {
+         const node = nodes[i];
+         if(node.type === QAppNodeType.APP && node.children)
+         {
+            this.buildPathsMap(node.children, path + "/" + node.name);
+         }
+         else
+         {
+            if(!this.pathsMap[node.name])
+            {
+               this.pathsMap[node.name] = [];
+            }
+            this.pathsMap[node.name].push({path: path + "/" + node.name, affinity: node.appAffinity ?? Number.MIN_SAFE_INTEGER});
+         }
+      }
    }
 
 
@@ -149,7 +189,7 @@ export class QInstance
     *******************************************************************************/
    getTablePath(table: QTableMetaData): string | null
    {
-      return QInstance.searchAppTreeForPath(this.appTree, table.name, QAppNodeType.TABLE, 1, "");
+      return this.getTablePathByName(table.name);
    }
 
    /*******************************************************************************
@@ -157,7 +197,14 @@ export class QInstance
     *******************************************************************************/
    getTablePathByName(tableName: string): string | null
    {
-      return QInstance.searchAppTreeForPath(this.appTree, tableName, QAppNodeType.TABLE, 1, "");
+      const value = this.pathsMap[tableName];
+      if(value)
+      {
+         value.sort((a, b) => b.affinity - a.affinity);
+         return (value[0].path);
+      }
+
+      return (null);
    }
 
    /*******************************************************************************
