@@ -21,6 +21,8 @@
 
 
 import {QHelpContent} from "../../../src/model/metaData/QHelpContent";
+import {QMenu} from "../../../src/model/metaData/QMenu";
+import {QMenuItem} from "../../../src/model/metaData/QMenuItem";
 import {QTableMetaData} from "../../../src/model/metaData/QTableMetaData";
 
 describe("QTableMetaData tests", () =>
@@ -229,7 +231,18 @@ describe("QTableMetaData tests", () =>
                      "contentAsHtml": "Table Help"
                   }
                ]
-            }
+            },
+            "menus": [
+               {
+                  label: "My Menu",
+                  icon: {name: "hotdog"},
+                  slot: "VIEW_SCREEN_ADDITIONAL",
+                  items: [
+                     {label: "Cars", icon: {name: "car"}, itemType: "RUN_PROCESS", values: {processName: "runCarsProcess"}},
+                     {label: "Apples", icon: {name: "download"}, itemType: "DOWNLOAD_FILE", values: {fieldName: "appleFileUrl"}},
+                  ]
+               }
+            ]
          });
 
       ////////////////////////////////////////////////////////////////
@@ -261,6 +274,9 @@ describe("QTableMetaData tests", () =>
       expect(cloneApiKeyField?.adornments?.length).toEqual(apiKeyField?.adornments?.length);
       expect(cloneApiKeyField?.adornments?.[0].values?.size).not.toEqual(0);
       expect(cloneApiKeyField?.adornments?.[0].values?.size).toEqual(apiKeyField?.adornments?.[0].values?.size);
+
+      expect(cloneTable.menus?.length).toEqual(1);
+      expect(cloneTable.menus?.[0].items?.length).toEqual(2);
 
       ////////////////////////////////////////////////////////////////////////////////////////////////
       // turns out toEqual will do a deep equality test, so, we could have just done this all along //
@@ -306,6 +322,13 @@ describe("QTableMetaData tests", () =>
       cloneTable.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.push("another");
       expect(table.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.length).toEqual(2);
       expect(cloneTable.sections?.[0]?.alternatives?.get("RECORD_VIEW")?.fieldNames?.length).toEqual(3);
+
+      cloneTable.menus?.[0]?.icon && (cloneTable.menus[0].icon.name = "hamburger");
+      cloneTable.menus?.[0]?.items && (cloneTable.menus[0].items.push(new QMenuItem({itemType: "DIVIDER"})));
+      cloneTable.menus && (cloneTable.menus.push(new QMenu({})));
+      expect(cloneTable.menus?.[0]?.icon?.name).not.toEqual(table.menus?.[0]?.icon?.name);
+      expect(cloneTable.menus?.[0]?.items?.length).not.toEqual(table.menus?.[0]?.items?.length);
+      expect(cloneTable.menus?.length).not.toEqual(table.menus?.length);
    });
 
 });
