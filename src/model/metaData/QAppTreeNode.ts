@@ -35,6 +35,7 @@ export class QAppTreeNode
    children?: QAppTreeNode[];
    iconName?: string;
    icon?: QIcon;
+   appAffinity?: number;
 
    constructor(object: any)
    {
@@ -42,6 +43,7 @@ export class QAppTreeNode
       this.label = object.label;
       this.type = object.type;
       this.iconName = object.iconName;
+      this.appAffinity = object.appAffinity;
 
       if (object.icon)
       {
