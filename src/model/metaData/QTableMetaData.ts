@@ -22,6 +22,7 @@
 import {QExposedJoin} from "./QExposedJoin";
 import {QFieldMetaData} from "./QFieldMetaData";
 import {QHelpContent} from "./QHelpContent";
+import {QMenu} from "./QMenu";
 import {QTableSection} from "./QTableSection";
 
 /*******************************************************************************
@@ -49,6 +50,7 @@ export class QTableMetaData
    supplementalTableMetaData: Map<String, any> = new Map();
    shareableTableMetaData: any;
    helpContent?: Map<string, QHelpContent[]>;
+   menus?: QMenu[];
 
    constructor(object: any)
    {
@@ -103,7 +105,7 @@ export class QTableMetaData
       this.capabilities = new Set<string>();
       if (object.capabilities)
       {
-         for (var i = 0; i < object.capabilities.length; i++)
+         for (let i = 0; i < object.capabilities.length; i++)
          {
             this.capabilities.add(object.capabilities[i]);
          }
@@ -120,6 +122,15 @@ export class QTableMetaData
       this.shareableTableMetaData = object.shareableTableMetaData;
 
       this.helpContent = QHelpContent.buildMap(object.helpContents);
+
+      if(object.menus)
+      {
+         this.menus = [];
+         for(let i = 0; i < object.menus.length; i++)
+         {
+            this.menus.push(new QMenu(object.menus[i]));
+         }
+      }
    }
 
 
@@ -196,7 +207,17 @@ export class QTableMetaData
          supplementalTableMetaDataClone.set(name, Object.assign({}, value));
       });
 
+      const menusClone: QMenu[] | undefined = this.menus ? [] : undefined;
+      if (this.menus && menusClone)
+      {
+         for (let i = 0; i < this.menus.length; i++)
+         {
+            menusClone.push(this.menus[i].clone());
+         }
+      }
+
       const clone = new QTableMetaData({...this});
+
       clone.fields = fieldsClone;
       clone.virtualFields = virtualFieldsClone;
       clone.sections = sectionsClone;
@@ -204,6 +225,7 @@ export class QTableMetaData
       clone.capabilities = capabilitiesClone;
       clone.supplementalTableMetaData = supplementalTableMetaDataClone;
       clone.helpContent = helpContentsClone;
+      clone.menus = menusClone;
 
       return (clone);
    }

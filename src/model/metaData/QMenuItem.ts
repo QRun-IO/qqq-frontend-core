@@ -19,31 +19,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {QIcon} from "./QIcon";
+
 /*******************************************************************************
- ** Meta-Data to define an icon for use in a QQQ instance
- **
+ * Meta-Data that defines a MenuItem in a QQQ Instance
+ *
  *******************************************************************************/
-export class QIcon
+export class QMenuItem
 {
-   name?: string;
-   path?: string;
-   color?: string;
+   label: string;
+   icon?: QIcon;
+   itemType: string;
+   values?: Map<string, any>;
 
    constructor(object: any)
    {
-      this.name = object.name;
-      this.path = object.path;
-      this.color = object.color;
+      this.label = object.label;
+      if (object.icon)
+      {
+         this.icon = new QIcon(object.icon);
+      }
+      this.itemType = object.itemType;
+
+      if (object.values)
+      {
+         this.values = new Map<string, any>();
+
+         for (let key in object.values)
+         {
+            this.values?.set(key, object.values[key]);
+         }
+      }
    }
 
    /***************************************************************************
     *
     ***************************************************************************/
-   public clone(): QIcon
+   public clone(): QMenuItem
    {
-      const clone = new QIcon({
-         ...this
+      const clone = new QMenuItem({
+         label: this.label,
+         itemType: this.itemType
       });
+
+      clone.icon = this.icon?.clone();
+
+      if (this.values)
+      {
+         clone.values = new Map<string, any>();
+         this.values.forEach((value: any, key: string) => clone.values?.set(key, value));
+      }
+
       return (clone);
    }
 }
