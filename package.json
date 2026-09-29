@@ -8,7 +8,7 @@
       "delete-modules": "rm -rf node_modules; rm package-lock.json",
       "lint": "eslint . --ext .ts",
       "npm-install": "npm install",
-      "clean-and-install": "rm -rf node_modules/ && rm -rf package-lock.json && rm -rf lib/ && npm install",
+      "clean-and-install": "npm ci && npm run prepublishOnly",
       "prepublishOnly": "rm -rf lib/ && tsc -p ./ --outDir lib/",
       "test": "jest",
       "yalc-push": "npm run prepublishOnly && yalc push --private",
