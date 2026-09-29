@@ -111,9 +111,9 @@ describe("QController real HTTP transport", () =>
       expect(requests[0].method).toBe("POST");
       expect(requests[0].headers["content-type"]).toBe(`multipart/form-data; boundary=${data.getBoundary()}`);
       expect(requests[0].body).toContain(`--${data.getBoundary()}`);
-      expect(requests[0].body).toContain('name="description"');
+      expect(requests[0].body).toContain("name=\"description\"");
       expect(requests[0].body).toContain("Fixture café");
-      expect(requests[0].body).toContain('filename="fixture.txt"');
+      expect(requests[0].body).toContain("filename=\"fixture.txt\"");
       expect(requests[0].body).toContain("owned upload bytes");
    });
 
