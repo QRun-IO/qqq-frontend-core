@@ -3,13 +3,14 @@
 version: 2.1
 
 orbs:
-  qqq-orb: kingsrook/qqq-orb@0.6
+  qqq-orb: kingsrook/qqq-orb@0.6.7
 
 workflows:
 
   test_only:
     jobs:
       - qqq-orb/node_test_only:
+          node_version: "24.21"
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           filters:
             branches:
@@ -20,6 +21,8 @@ workflows:
   publish_snapshot:
     jobs:
       - qqq-orb/node_publish:
+          node_version: "24.21"
+          npm_trusted_publishing: true
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: snapshot
           filters:
@@ -30,6 +33,8 @@ workflows:
   publish_feature:
     jobs:
       - qqq-orb/node_publish:
+          node_version: "24.21"
+          npm_trusted_publishing: true
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: feature
           filters:
@@ -42,6 +47,8 @@ workflows:
   publish_release_candidate:
     jobs:
       - qqq-orb/node_publish:
+          node_version: "24.21"
+          npm_trusted_publishing: true
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: release_candidate
           filters:
@@ -52,6 +59,8 @@ workflows:
   publish_release:
     jobs:
       - qqq-orb/node_publish:
+          node_version: "24.21"
+          npm_trusted_publishing: true
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: release
           filters:
@@ -63,6 +72,8 @@ workflows:
   publish_hotfix_release:
     jobs:
       - qqq-orb/node_publish:
+          node_version: "24.21"
+          npm_trusted_publishing: true
           context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           branch_type: hotfix
           filters:
