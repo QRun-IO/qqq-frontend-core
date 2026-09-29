@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {Collapsible} from "./Collapsible";
 import {QHelpContent} from "./QHelpContent";
 
 /*******************************************************************************
@@ -36,6 +37,8 @@ export class QTableSection
    isHidden: boolean;
    gridColumns?: number;
    helpContents?: QHelpContent[];
+   alternatives?: Map<string, QTableSection>;
+   collapsible?: Collapsible;
 
 
    /*******************************************************************************
@@ -46,7 +49,7 @@ export class QTableSection
       this.name = object.name;
       this.label = object.label;
       this.tier = object.tier;
-      this.iconName = object.icon ? object.icon.name : null;
+      this.iconName = object.icon ? object.icon.name : object.iconName;
 
       if (object.fieldNames)
       {
@@ -58,6 +61,59 @@ export class QTableSection
       this.gridColumns = object.gridColumns;
 
       this.helpContents = QHelpContent.buildArray(object.helpContents)
+
+      if (object.alternatives)
+      {
+         this.alternatives = new Map<string, QTableSection>();
+         for (let type in object.alternatives)
+         {
+            this.alternatives.set(type, new QTableSection(object.alternatives[type]));
+         }
+      }
+
+      if (object.collapsible)
+      {
+         this.collapsible = new Collapsible(object.collapsible);
+      }
+   }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QTableSection
+   {
+      let fieldNamesClone: string[] | undefined = undefined;
+      if(this.fieldNames)
+      {
+         fieldNamesClone = [...this.fieldNames];
+      }
+
+      const helpContentsClone: QHelpContent[] = (this.helpContents ? [] : undefined) as QHelpContent[];
+      if(this.helpContents && helpContentsClone)
+      {
+         for (let helpContent of this.helpContents)
+         {
+            helpContentsClone.push((helpContent as any).clone());
+         }
+      }
+
+      const alternativesClone: Map<string, QTableSection> | undefined = (this.alternatives ? new Map<string, QTableSection> : undefined)
+      if(this.alternatives && alternativesClone)
+      {
+         this.alternatives.forEach((value: QTableSection, key: string) =>
+            alternativesClone.set(key, value.clone()));
+      }
+
+      const collapsibleClone: Collapsible | undefined = (this.collapsible ? this.collapsible.clone() : undefined);
+
+      const clone = new QTableSection({...this});
+
+      clone.fieldNames = fieldNamesClone;
+      clone.helpContents = helpContentsClone;
+      clone.alternatives = alternativesClone;
+      clone.collapsible = collapsibleClone;
+
+      return (clone);
    }
 
 }

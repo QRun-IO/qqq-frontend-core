@@ -35,4 +35,15 @@ export class QIcon
       this.path = object.path;
       this.color = object.color;
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QIcon
+   {
+      const clone = new QIcon({
+         ...this
+      });
+      return (clone);
+   }
 }

@@ -20,29 +20,35 @@
  */
 
 /*******************************************************************************
- ** Define a filter order by in a QQQ instance.
+ ** Define a field function being used in a QQQ application
  **
  *******************************************************************************/
-export class QFilterOrderBy
+export class FieldFunction
 {
    fieldName: string;
-   isAscending?: boolean;
+   functionTypeIdentifierName: string;
+   arguments: Record<string, any>
 
-   constructor(fieldName: string, isAscending?: boolean)
+   constructor(fieldName: string, functionTypeIdentifierName: string, _arguments: Record<string, any>)
    {
       this.fieldName = fieldName;
-      this.isAscending = isAscending;
+      this.functionTypeIdentifierName = functionTypeIdentifierName;
+      this.arguments = _arguments;
    }
 
    /***************************************************************************
     *
     ***************************************************************************/
-   public clone(): QFilterOrderBy
+   public clone(): FieldFunction
    {
-      const clone = new QFilterOrderBy(
+      const cloneArguments = (this.arguments === null ? null : this.arguments === undefined ? undefined : {...this.arguments}) as Record<string, any>;
+
+      const clone = new FieldFunction(
          this.fieldName,
-         this.isAscending
+         this.functionTypeIdentifierName,
+         cloneArguments
       );
+
       return (clone);
    }
 }

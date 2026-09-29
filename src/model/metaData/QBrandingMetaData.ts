@@ -33,6 +33,8 @@ export class QBrandingMetaData
    logo?: string;
    icon?: string;
    accentColor?: string;
+   accentColorLight?: string;
+   gravatarDefault?: string;
 
    // Deprecated
    environmentBannerText?: string;
@@ -50,6 +52,8 @@ export class QBrandingMetaData
       this.logo = object.logo;
       this.icon = object.icon;
       this.accentColor = object.accentColor;
+      this.accentColorLight = object.accentColorLight;
+      this.gravatarDefault = object.gravatarDefault;
       this.environmentBannerText = object.environmentBannerText;
       this.environmentBannerColor = object.environmentBannerColor;
 

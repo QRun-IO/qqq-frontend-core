@@ -35,6 +35,7 @@ export enum AdornmentType
    FILE_DOWNLOAD = "FILE_DOWNLOAD",
    FILE_UPLOAD = "FILE_UPLOAD",
    TOOLTIP = "TOOLTIP",
+   WIDGET = "WIDGET",
    ///////////////////////////////////////////////////////////////////////////
    // keep these values in sync with AdornmentType.java in qqq-backend-core //
    ///////////////////////////////////////////////////////////////////////////

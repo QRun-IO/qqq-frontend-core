@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {Collapsible} from "./Collapsible";
 import {QHelpContent} from "./QHelpContent";
 import {QIcon} from "./QIcon";
 
@@ -51,6 +52,7 @@ export class QWidgetMetaData
 
    helpContent?: Map<string, QHelpContent[]>;
    defaultValues?: Map<string, any>;
+   collapsible?: Collapsible;
 
    constructor(object: any)
    {
@@ -89,5 +91,9 @@ export class QWidgetMetaData
          }
       }
 
+      if (object.collapsible)
+      {
+         this.collapsible = new Collapsible(object.collapsible);
+      }
    }
 }

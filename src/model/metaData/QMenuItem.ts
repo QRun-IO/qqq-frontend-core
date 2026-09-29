@@ -19,30 +19,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*******************************************************************************
- ** Define a filter order by in a QQQ instance.
- **
- *******************************************************************************/
-export class QFilterOrderBy
-{
-   fieldName: string;
-   isAscending?: boolean;
+import {QIcon} from "./QIcon";
 
-   constructor(fieldName: string, isAscending?: boolean)
+/*******************************************************************************
+ * Meta-Data that defines a MenuItem in a QQQ Instance
+ *
+ *******************************************************************************/
+export class QMenuItem
+{
+   label: string;
+   icon?: QIcon;
+   itemType: string;
+   values?: Map<string, any>;
+
+   constructor(object: any)
    {
-      this.fieldName = fieldName;
-      this.isAscending = isAscending;
+      this.label = object.label;
+      if (object.icon)
+      {
+         this.icon = new QIcon(object.icon);
+      }
+      this.itemType = object.itemType;
+
+      if (object.values)
+      {
+         this.values = new Map<string, any>();
+
+         for (let key in object.values)
+         {
+            this.values?.set(key, object.values[key]);
+         }
+      }
    }
 
    /***************************************************************************
     *
     ***************************************************************************/
-   public clone(): QFilterOrderBy
+   public clone(): QMenuItem
    {
-      const clone = new QFilterOrderBy(
-         this.fieldName,
-         this.isAscending
-      );
+      const clone = new QMenuItem({
+         label: this.label,
+         itemType: this.itemType
+      });
+
+      clone.icon = this.icon?.clone();
+
+      if (this.values)
+      {
+         clone.values = new Map<string, any>();
+         this.values.forEach((value: any, key: string) => clone.values?.set(key, value));
+      }
+
       return (clone);
    }
 }

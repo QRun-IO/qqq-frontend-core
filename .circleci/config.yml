@@ -1,535 +1,71 @@
-###############################################################################
-## 
-## CircleCI Configuration for QQQ Frontend Core
-## ===========================================
-##
-## This configuration implements a GitFlow-based CI/CD strategy for the frontend core library,
-## following the same versioning and branching policies as the main QQQ project.
-##
-## 🚀 WORKFLOWS OVERVIEW:
-## ----------------------
-## 1. test_only          - Feature branches (build, test, linting)
-## 2. deploy_snapshot    - develop branch (publishes -SNAPSHOT versions)
-## 3. publish_rc         - release/* branches (publishes -RC.n versions)
-## 4. publish_release    - main branch (publishes stable versions)
-## 5. publish_hotfix     - hotfix/* branches (publishes patch versions)
-##
-## 🌿 GITFLOW BRANCHING STRATEGY:
-## ------------------------------
-## - main: Production releases (X.Y.Z) → Public NPM registry
-## - develop: Development snapshots (X.Y.Z-SNAPSHOT) → Public NPM registry  
-## - release/*: Release candidates (X.Y.0-RC.n) → Public NPM registry
-## - hotfix/*: Hotfix releases (X.Y.(Z+1)) → Public NPM registry
-## - feature/*: Feature development → Build and test only (no publishing)
-##
-## 🔄 VERSION MANAGEMENT:
-## ---------------------
-## - NPM versions: Automatically calculated using .circleci/sync-npm-version.sh
-## - GitFlow versioning: RC increments, hotfix patches, develop bumps
-## - Automatic version updates based on branch type
-## - Direct publishing to public NPM registry (npmjs.org)
-## - No GitHub releases - clean NPM-only publishing
-##
-## 🔐 AUTHENTICATION & SECURITY:
-## -----------------------------
-## - NPM Registry: NPM_TOKEN (from qqq-maven-registry-credentials context)
-## - All packages published with public access to npmjs.org under @qrunio organization
-## - Credentials stored securely in shared CircleCI context
-## - Direct publishing to public registry for maximum visibility
-##
-## 🛠️ BUILD TOOLS & DEPENDENCIES:
-## ------------------------------
-## - circleci/node@4.7: Node.js runtime and package management
-## - npm: Node.js package manager with TypeScript build tools
-## - TypeScript: JavaScript compilation and type checking
-## - Jest: Testing framework for JavaScript/TypeScript
-## - ESLint: Code quality and linting
-##
-## 📁 KEY SCRIPTS & FILES:
-## ------------------------
-## - sync-npm-version.sh: NPM version management based on branch type
-## - config.yml: This CircleCI configuration file
-##
-## 🎯 VERSION PATTERNS BY BRANCH:
-## ------------------------------
-## | Branch Type | Version Pattern | Example | Repository |
-## |-------------|----------------|---------|------------|
-## | main        | X.Y.Z          | 1.0.0   | Public NPM (@qrunio on npmjs.org) |
-## | develop     | X.Y.Z-SNAPSHOT | 1.0.127-SNAPSHOT | Public NPM (@qrunio on npmjs.org) |
-## | release/*   | X.Y.0-RC.n     | 1.0.0-RC.1 | Public NPM (@qrunio on npmjs.org) |
-## | hotfix/*    | X.Y.(Z+1)      | 1.0.1   | Public NPM (@qrunio on npmjs.org) |
-## | feature/*   | Inherits from develop | 1.0.127-SNAPSHOT | No publishing |
-##
-###############################################################################
+---
+
 version: 2.1
 
-###############################################################################
-## ORBS (Reusable CI Components)
-## =============================
-## circleci/node@4.7: Provides Node.js runtime, npm package management, and caching
-###############################################################################
 orbs:
-  node: circleci/node@4.7
+  qqq-orb: kingsrook/qqq-orb@0.6
 
-###############################################################################
-## COMMANDS (Reusable Step Collections)
-## ===================================
-## These commands define common operations that can be reused across multiple jobs
-## to avoid duplication and ensure consistency.
-###############################################################################
-commands:
-
-  ###############################################################################
-  ## 🏗️ FRONTEND BUILD COMMAND
-  ## ==========================
-  ## Builds the frontend core library and sets up the complete development environment
-  ## 
-  ## What it does:
-  ## - Restores NPM dependency cache for faster builds
-  ## - Installs Node.js dependencies (npm install)
-  ## - Compiles TypeScript project (npm run prepublishOnly)
-  ## - Saves NPM cache for future builds
-  ##
-  ## Cache Strategy:
-  ## - NPM: Based on package.json checksum
-  ## - Optimized for TypeScript compilation
-  ## - Fast dependency resolution
-  ###############################################################################
-  install_dependencies:
-    steps:
-      - checkout
-      # Install packages with NPM, using CircleCI's optimized caching
-      - node/install-packages:
-          pkg-manager: npm
-          cache-path: node_modules
-      # Build TypeScript project after dependencies are installed
-      - run:
-          name: "Build TypeScript project"
-          command: npm run prepublishOnly
-
-  ###############################################################################
-  ## 🧪 FRONTEND TEST COMMAND
-  ## =========================
-  ## Runs comprehensive testing for the frontend core library
-  ## 
-  ## What it does:
-  ## - Executes NPM tests with coverage (--coverage --passWithNoTests)
-  ## - Runs ESLint for code quality and consistency
-  ## - Collects and stores test artifacts for analysis
-  ## - Stores coverage reports for quality metrics
-  ##
-  ## Test Coverage:
-  ## - Jest: JavaScript/TypeScript unit tests
-  ## - ESLint: Code quality and style validation
-  ## - Coverage reports stored as CircleCI artifacts
-  ###############################################################################
-  run_tests:
-    steps:
-      - run:
-          name: "Run tests"
-          command: npm test
-      - run:
-          name: "Run linting"
-          command: npm run lint
-
-  ###############################################################################
-  ## 🔄 VERSION MANAGEMENT COMMAND
-  ## =============================
-  ## Automated version management for GitFlow branching strategy
-  ## 
-  ## What it does:
-  ## - Determines appropriate version based on branch type and current version
-  ## - Updates package.json version automatically using sync-npm-version.sh
-  ## - Commits and pushes version changes back to the branch
-  ## - Handles GitFlow versioning strategy automatically
-  ## - Ensures version consistency across the project
-  ##
-  ## Version Strategy:
-  ## - develop: Bumps to next patch version (X.Y.Z+1-SNAPSHOT)
-  ## - release/*: Increments RC number (X.Y.0-RC.n)
-  ## - hotfix/*: Bumps patch version (X.Y.Z+1)
-  ## - feature/*: No version changes (inherits from develop)
-  ###############################################################################
-  manage_version:
-    steps:
-      - add_ssh_keys   # injects the CircleCI User Key (write-capable)
-      - run:
-          name: Set up Git identity for version commits
-          command: |
-            git config user.email "ci@kingsrook.com"
-            git config user.name "CircleCI"
-      - run:
-          name: "Synchronize NPM version"
-          command: .circleci/sync-npm-version.sh
-      - run:
-          name: Commit version changes if modified
-          command: |
-            if [[ -n "$(git status --porcelain package.json)" ]]; then
-              NEW_VERSION=$(grep '"version"' package.json | sed 's/.*"version": "//;s/".*//')
-              git add package.json
-              git commit -m "Bump version to $NEW_VERSION [skip ci]"
-              git push origin "HEAD:${CIRCLE_BRANCH}"
-              echo "Version updated to: $NEW_VERSION and pushed"
-            else
-              echo "No version change needed"
-            fi
-
-  ###############################################################################
-  ## 📦 BUILD AND PACKAGE COMMAND
-  ## =============================
-  ## Creates the distributable package and persists it for later jobs
-  ## 
-  ## What it does:
-  ## - Cleans previous builds and reinstalls dependencies
-  ## - Compiles TypeScript to JavaScript
-  ## - Creates distributable package structure
-  ## - Persists build artifacts to workspace for use in publishing jobs
-  ##
-  ## Package Structure:
-  ## - lib/: Compiled TypeScript output
-  ## - package.json: Updated package manifest
-  ## - README.md: Documentation
-  ## - LICENSE: License file
-  ###############################################################################
-  build_package:
-    steps:
-      - run:
-          name: "Clean and build"
-          command: npm run clean-and-install
-      # Persist build artifacts to workspace for use in publishing jobs
-      - persist_to_workspace:
-          root: .
-          paths:
-            - lib/              # Compiled TypeScript output
-            - package.json      # Updated package manifest
-            - README.md         # Documentation
-            - LICENSE           # License file
-
-  ###############################################################################
-  ## 📦 NPM PUBLISHING COMMAND
-  ## ==========================
-  ## Publishes packages to the public NPM registry (npmjs.org)
-  ## 
-  ## What it does:
-  ## - Sets up NPM authentication for public registry
-  ## - Verifies authentication by checking current user
-  ## - Publishes package with public access
-  ## - Ensures maximum visibility and accessibility
-  ##
-  ## Publishing Features:
-  ## - Public access for all packages
-  ## - Direct publishing to npmjs.org
-  ## - No GitHub releases - clean NPM-only workflow
-  ###############################################################################
-  publish_npm:
-    steps:
-      - run:
-          name: "Setup NPM authentication"
-          command: |
-            # Configure NPM authentication for public registry
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-            # Verify authentication by checking current user
-            npm whoami
-      - run:
-          name: "Publish to NPM"
-          command: npm publish --access public
-
-###############################################################################
-## JOBS (Workflow Execution Units)
-## ===============================
-## Jobs define the actual work to be done in each workflow.
-## Each job uses the Node.js executor for consistent environment.
-###############################################################################
-jobs:
-
-  ###############################################################################
-  ## 🏗️ BUILD JOB
-  ## =============
-  ## Basic build job that compiles the frontend core library
-  ## 
-  ## Purpose: Compile and build the complete frontend core library
-  ## Used by: test_only workflow for feature branches
-  ## 
-  ## What it does:
-  ## - Sets up development environment
-  ## - Installs all dependencies (NPM)
-  ## - Compiles TypeScript components
-  ## - Manages dependency caching for performance
-  ###############################################################################
-  build:
-    description: "Build and test the frontend core package"
-    docker:
-      - image: cimg/node:16.10  # Use CircleCI's optimized Node.js image
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Run tests and linting
-      - build_package          # Create distributable package
-
-  ###############################################################################
-  ## 🧪 TEST ONLY JOB
-  ## =================
-  ## Lightweight testing job for feature branches
-  ## 
-  ## Purpose: Validate code quality and functionality without building package
-  ## Used by: test_only workflow for feature branches
-  ## 
-  ## What it does:
-  ## - Installs dependencies and builds TypeScript
-  ## - Runs tests and linting
-  ## - No package creation or publishing
-  ###############################################################################
-  test_only:
-    description: "Run tests without building package (for feature branches)"
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Run tests and linting only
-
-  ###############################################################################
-  ## 📦 SNAPSHOT DEPLOYMENT JOB
-  ## ===========================
-  ## Deploys snapshot versions to public NPM registry
-  ## 
-  ## Purpose: Provide nightly builds for developers and QA testing
-  ## Used by: deploy_snapshot workflow for develop branch
-  ## Publishes: X.Y.Z-SNAPSHOT versions to public NPM registry
-  ## 
-  ## What it does:
-  ## - Builds the complete frontend core library
-  ## - Manages versions (SNAPSHOT updates)
-  ## - Runs comprehensive tests
-  ## - Deploys to public NPM registry
-  ## - Enables continuous integration and nightly builds
-  ###############################################################################
-  deploy_snapshot:
-    description: "Deploy snapshot version to public NPM registry"
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Validate code quality
-      - manage_version         # Update to SNAPSHOT version
-      - build_package          # Create distributable package
-      - publish_npm            # Publish to public NPM registry
-
-  ###############################################################################
-  ## 🧪 RELEASE CANDIDATE JOB
-  ## =========================
-  ## Publishes release candidate versions to public NPM registry
-  ## 
-  ## Purpose: Provide RC builds for QA testing and stakeholder review
-  ## Used by: publish_rc workflow for release/* branches
-  ## Publishes: X.Y.0-RC.n versions to public NPM registry
-  ## 
-  ## What it does:
-  ## - Builds the complete frontend core library
-  ## - Runs comprehensive tests for quality assurance
-  ## - Manages versions (RC increments)
-  ## - Deploys to public NPM registry
-  ## - Prepares stable versions for production deployment
-  ###############################################################################
-  publish_rc:
-    description: "Publish release candidate to public NPM registry"
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Validate code quality
-      - manage_version         # Update to RC version
-      - build_package          # Create distributable package
-      - publish_npm            # Publish to public NPM registry
-
-  ###############################################################################
-  ## 🚀 PRODUCTION RELEASE JOB
-  ## ==========================
-  ## Publishes production releases to public NPM registry
-  ## 
-  ## Purpose: Deploy stable versions to production
-  ## Used by: publish_release workflow for main branch
-  ## Publishes: X.Y.Z versions to public NPM registry
-  ## 
-  ## What it does:
-  ## - Builds the complete frontend core library
-  ## - Manages versions (stable release)
-  ## - Runs comprehensive tests for production validation
-  ## - Deploys to public NPM registry
-  ## - Enables production deployment
-  ###############################################################################
-  publish_release:
-    description: "Publish release version to public NPM registry"
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Validate code quality
-      - manage_version         # Update to release version
-      - build_package          # Create distributable package
-      - publish_npm            # Publish to public NPM registry
-
-  ###############################################################################
-  ## 🔥 HOTFIX RELEASE JOB
-  ## ======================
-  ## Publishes hotfix releases to public NPM registry
-  ## 
-  ## Purpose: Deploy critical bug fixes and security patches
-  ## Used by: publish_hotfix workflow for hotfix/* branches
-  ## Publishes: X.Y.(Z+1) versions to public NPM registry
-  ## 
-  ## What it does:
-  ## - Builds the complete frontend core library
-  ## - Manages versions (patch increment)
-  ## - Runs comprehensive tests for hotfix validation
-  ## - Deploys to public NPM registry
-  ## - Enables urgent production fixes
-  ###############################################################################
-  publish_hotfix:
-    description: "Publish hotfix version to public NPM registry"
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - install_dependencies    # Install deps and build TypeScript
-      - run_tests              # Validate code quality
-      - manage_version         # Update to hotfix version
-      - build_package          # Create distributable package
-      - publish_npm            # Publish to public NPM registry
-
-###############################################################################
-## WORKFLOWS (CI/CD Pipeline Orchestration)
-## =======================================
-## Workflows define when and how jobs are executed based on branch patterns and triggers.
-## Each workflow implements a specific part of the GitFlow branching strategy.
-###############################################################################
 workflows:
 
-  ###############################################################################
-  ## 🧪 TEST ONLY WORKFLOW
-  ## =====================
-  ## Runs on feature branches and other non-protected branches
-  ## 
-  ## Purpose: Validate code quality and functionality before merging
-  ## Triggers: Any push to branches NOT matching develop, main, release/*, hotfix/*
-  ## Jobs: test_only (validation only)
-  ## 
-  ## What it does:
-  ## - Builds the frontend core library
-  ## - Runs comprehensive tests
-  ## - Generates coverage reports
-  ## - No publishing - validation only
-  ###############################################################################
   test_only:
-    description: "Test workflow for feature branches and PRs"
-    triggers:
-      # Daily scheduled trigger for develop branch to ensure code quality
-      - schedule:
-          cron: "0 0 * * *"    # Run daily at midnight UTC
-          filters:
-            branches:
-              only: develop
     jobs:
-      - test_only:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
+      - qqq-orb/node_test_only:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
           filters:
-            # Only run on feature branches, ignore main workflow branches
             branches:
-              ignore: [main, develop, /release\/.*/, /hotfix\/.*/]
+              ignore: /(develop|main|release/.*|hotfix/.*|integration.*)/
+            tags:
+              only: []
 
-  ###############################################################################
-  ## 📦 SNAPSHOT DEPLOYMENT WORKFLOW
-  ## =================================
-  ## Runs on develop branch to publish development snapshots
-  ## 
-  ## Purpose: Provide nightly builds for developers and QA testing
-  ## Triggers: Push to develop branch
-  ## Publishes: X.Y.Z-SNAPSHOT versions to public NPM registry
-  ## Jobs: deploy_snapshot (NPM publishing)
-  ## 
-  ## What it does:
-  ## - Builds and tests the frontend core library
-  ## - Manages versions (SNAPSHOT updates)
-  ## - Deploys to public NPM registry
-  ## - Enables continuous integration and nightly builds
-  ###############################################################################
-  deploy_snapshot:
-    description: "Deploy snapshot version to public NPM registry from develop branch"
+  publish_snapshot:
     jobs:
-      - deploy_snapshot:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
+          branch_type: snapshot
           filters:
             branches:
-              only: develop
+              only:
+                - develop
 
-  ###############################################################################
-  ## 🧪 RELEASE CANDIDATE WORKFLOW
-  ## =============================
-  ## Runs on release/* branches to publish release candidates
-  ## 
-  ## Purpose: Provide RC builds for QA testing and stakeholder review
-  ## Triggers: Push to any branch matching release/* pattern
-  ## Publishes: X.Y.0-RC.n versions to public NPM registry
-  ## Jobs: publish_rc (build, test, RC artifact creation)
-  ## 
-  ## What it does:
-  ## - Builds and tests the frontend core library
-  ## - Manages versions (RC increments)
-  ## - Deploys to public NPM registry
-  ## - Prepares stable versions for production
-  ###############################################################################
-  publish_rc:
-    description: "Publish release candidate to public NPM registry from release branches"
+  publish_feature:
     jobs:
-      - publish_rc:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
+          branch_type: feature
           filters:
             branches:
-              only: /release\/.*/
+              only:
+                - feature/.*
+            tags:
+              only: [/publish.*/]
 
-  ###############################################################################
-  ## 🚀 PRODUCTION RELEASE WORKFLOW
-  ## ===============================
-  ## Runs on main branch to publish production releases
-  ## 
-  ## Purpose: Deploy stable versions to production
-  ## Triggers: Push to main branch (typically after merging release branches)
-  ## Publishes: X.Y.Z versions to public NPM registry
-  ## Jobs: publish_release (build, test, NPM deploy)
-  ## 
-  ## What it does:
-  ## - Builds and tests the frontend core library
-  ## - Manages versions (stable release)
-  ## - Deploys to public NPM registry
-  ## - Enables production deployment
-  ###############################################################################
+  publish_release_candidate:
+    jobs:
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
+          branch_type: release_candidate
+          filters:
+            branches:
+              only:
+                - /release\/.*/
+
   publish_release:
-    description: "Publish release version to public NPM registry from main branch"
     jobs:
-      - publish_release:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
+          branch_type: release
           filters:
             branches:
-              only: main
+              only: [main]
+            tags:
+              only: [/v.*/]
 
-  ###############################################################################
-  ## 🔥 HOTFIX RELEASE WORKFLOW
-  ## ===========================
-  ## Runs on hotfix/* branches to publish urgent production fixes
-  ## 
-  ## Purpose: Deploy critical bug fixes and security patches
-  ## Triggers: Push to any branch matching hotfix/* pattern
-  ## Publishes: X.Y.(Z+1) versions to public NPM registry
-  ## Jobs: publish_hotfix (build, test, NPM deploy)
-  ## 
-  ## What it does:
-  ## - Builds and tests the frontend core library
-  ## - Manages versions (patch increment)
-  ## - Deploys to public NPM registry
-  ## - Enables urgent production fixes
-  ###############################################################################
-  publish_hotfix:
-    description: "Publish hotfix version to public NPM registry from hotfix branches"
+  publish_hotfix_release:
     jobs:
-      - publish_hotfix:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
+      - qqq-orb/node_publish:
+          context: [qqq-maven-registry-credentials, build-qqq-sample-app]
+          branch_type: hotfix
           filters:
             branches:
-              only: /hotfix\/.*/
+              only:
+                - /hotfix\/.*/

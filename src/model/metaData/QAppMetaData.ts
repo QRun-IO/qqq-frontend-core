@@ -21,6 +21,7 @@
 
 import {QAppSection} from "./QAppSection";
 import {QAppTreeNode} from "./QAppTreeNode";
+import {QHelpContent} from "./QHelpContent";
 
 /*******************************************************************************
  ** Meta-Data to define an app in a QQQ instance.
@@ -36,6 +37,7 @@ export class QAppMetaData
    widgets?: string[];
    sections?: QAppSection[];
    supplementalAppMetaData: Map<String, any> = new Map();
+   helpContent?: Map<string, QHelpContent[]>;
 
    constructor(object: any)
    {
@@ -64,13 +66,17 @@ export class QAppMetaData
          }
       }
 
-      if(object.supplementalAppMetaData)
+      if (object.supplementalAppMetaData)
       {
          for (const key in object.supplementalAppMetaData)
          {
             this.supplementalAppMetaData.set(key, object.supplementalAppMetaData[key]);
          }
       }
-   }
 
+      if (object.helpContents)
+      {
+         this.helpContent = QHelpContent.buildMap(object.helpContents);
+      }
+   }
 }

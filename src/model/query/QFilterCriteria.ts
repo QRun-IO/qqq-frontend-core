@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {FieldFunction} from "./FieldFunction";
 import {QCriteriaOperator} from "./QCriteriaOperator";
 
 /*******************************************************************************
@@ -31,11 +32,35 @@ export class QFilterCriteria
    operator: QCriteriaOperator;
    values!: any[];
    otherFieldName?: string;
+   fieldFunction?: FieldFunction;
 
    constructor(fieldName: string, operator: QCriteriaOperator, values: any[])
    {
       this.fieldName = fieldName;
       this.operator = operator;
       this.values = values;
+   }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QFilterCriteria
+   {
+      const cloneValues = (this.values === null ? null : this.values === undefined ? undefined : [...this.values]) as any[];
+
+      const clone = new QFilterCriteria(
+         this.fieldName,
+         this.operator,
+         cloneValues
+      );
+
+      clone.otherFieldName = this.otherFieldName;
+
+      if(this.fieldFunction)
+      {
+         clone.fieldFunction = this.fieldFunction.clone();
+      }
+
+      return (clone);
    }
 }

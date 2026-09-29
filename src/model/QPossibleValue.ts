@@ -34,5 +34,16 @@ export class QPossibleValue
       this.id = object.id;
       this.label = object.label;
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QPossibleValue
+   {
+      const clone = new QPossibleValue({
+         ...this
+      });
+      return (clone);
+   }
 }
 

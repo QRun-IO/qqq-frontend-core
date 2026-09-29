@@ -19,30 +19,51 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*******************************************************************************
- ** Define a filter order by in a QQQ instance.
- **
- *******************************************************************************/
-export class QFilterOrderBy
-{
-   fieldName: string;
-   isAscending?: boolean;
+import {QIcon} from "./QIcon";
+import {QMenuItem} from "./QMenuItem";
 
-   constructor(fieldName: string, isAscending?: boolean)
+/*******************************************************************************
+ * Meta-Data that defines a Menu in a QQQ Instance
+ *
+ *******************************************************************************/
+export class QMenu
+{
+   label: string;
+   icon?: QIcon;
+   slot: string;
+   items?: QMenuItem[];
+
+   constructor(object: any)
    {
-      this.fieldName = fieldName;
-      this.isAscending = isAscending;
+      this.label = object.label;
+      if (object.icon)
+      {
+         this.icon = new QIcon(object.icon);
+      }
+      this.slot = object.slot;
+      if (object.items)
+      {
+         this.items = object.items.map((item: any) => new QMenuItem(item));
+      }
    }
 
    /***************************************************************************
     *
     ***************************************************************************/
-   public clone(): QFilterOrderBy
+   public clone(): QMenu
    {
-      const clone = new QFilterOrderBy(
-         this.fieldName,
-         this.isAscending
-      );
+      const clone = new QMenu({
+         label: this.label,
+         slot: this.slot
+      });
+
+      clone.icon = this.icon?.clone();
+
+      if (this.items)
+      {
+         clone.items = this.items.map((item: QMenuItem) => item.clone());
+      }
+
       return (clone);
    }
 }

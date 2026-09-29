@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AxiosError, AxiosResponse} from "axios";
+import {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import FormData from "form-data";
 import {QException} from "../exceptions/QException";
 import {QAuthenticationMetaData} from "../model/metaData/QAuthenticationMetaData";
@@ -783,13 +783,15 @@ export class QController
             }
          }
 
+         const axiosConfigExtras: AxiosRequestConfig = {};
          if (dontGoAsyncOnBackend)
          {
             formDataOrQueryString.append("_qStepTimeoutMillis", 300 * 1000);
+            axiosConfigExtras.timeout = 300 * 1000;
          }
 
          return this.axiosInstance
-            .post(url, formDataOrQueryString, {headers: formDataHeaders})
+            .post(url, formDataOrQueryString, {headers: formDataHeaders, ...axiosConfigExtras})
             .then((response: AxiosResponse) =>
             {
                const responseObject = this.parseProcessResponse(response);
@@ -899,7 +901,7 @@ export class QController
 
 
    /*******************************************************************************
-    ** Fetch the data for a specific widget.
+    ** Fetch the data about variants for a table
     *******************************************************************************/
    async tableVariants(tableName: string): Promise<QTableVariant[]>
    {
@@ -933,24 +935,48 @@ export class QController
 
 
    /*******************************************************************************
-    ** Fetch the data for a specific widget.
+    * Fetch the data for a specific widget.
+    *
+    * Originally, this was a GET request, with params passed on the query string.
+    * However, that fails if params get too long.  So, in 10/2025, qqq-javalin
+    * is being updated to serve /widget/{widgetName} as a POST.
+    *
+    * This method, for some attempted backward compatibility, will first *try* a
+    * POST.  If it fails with a 404 (which an older version (w/o the POST endpoint)
+    * would return), then, assuming the params are a string (not FormData), then
+    * this method will automatically re-try the request as a GET.
     *******************************************************************************/
-   async widget(widgetName: string, urlParams?: string): Promise<any>
+   async widget(widgetName: string, params?: string | FormData, overrideAbortName?: string): Promise<any>
    {
       let url = `/widget/${encodeURIComponent(widgetName)}`;
-      if (urlParams)
+      const abortName = overrideAbortName ?? widgetName;
+
+      const paramsAreFormData = params instanceof FormData
+      let postBody: FormData;
+      if (paramsAreFormData)
       {
-         url += `?${urlParams}`;
+         postBody = params;
+      }
+      else
+      {
+         postBody = new FormData();
+         if (params)
+         {
+            for (let pair of params.split("&"))
+            {
+               let [name, value] = pair.split("=");
+               postBody.append(name, decodeURIComponent(value));
+            }
+         }
       }
 
       /////////////////////////////////////////////////////////////////
       // see if an abort controller was created for this widget name //
       /////////////////////////////////////////////////////////////////
-      console.log("Looking for controller for widget [" + widgetName + "]");
-      let controller = QController.widgetAbortControllerMap.get(widgetName);
+      let controller = QController.widgetAbortControllerMap.get(abortName);
       if (controller)
       {
-         console.log(`Found existing abort controller for widget '${widgetName}', aborting...`);
+         console.log(`Found existing abort controller for widget '${abortName}', aborting...`);
          controller.abort();
       }
 
@@ -959,7 +985,69 @@ export class QController
       /////////////////////////////////////////
       controller = new AbortController();
       const signal = controller.signal;
-      QController.widgetAbortControllerMap.set(widgetName, controller);
+      QController.widgetAbortControllerMap.set(abortName, controller);
+
+      return this.axiosInstance
+         .post(url, postBody, {signal})
+         .then((response: AxiosResponse) =>
+         {
+            ///////////////////////////////////////////////////
+            // make sure to clear out the request controller //
+            ///////////////////////////////////////////////////
+            QController.widgetAbortControllerMap.set(abortName, null);
+            return response.data;
+         })
+         .catch(async (e: any) =>
+         {
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            // if the server responded with 404, assume this could be due to the backend not supporting POST for //
+            // the widget endpoint - so if we took in params as a string (not FormData), then try to do a GET    //
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            if(e?.response?.status == 404)
+            {
+               if(!paramsAreFormData)
+               {
+                  return await this.getWidget(widgetName, params, overrideAbortName);
+               }
+               else
+               {
+                  console.log("widget POST request failed with 404 - but params are FormData, so we cannot attempt a fallback-GET...");
+               }
+            }
+
+            if (e.code && e.code === "ERR_CANCELED")
+            {
+               console.log("Controller request cancellation successful!");
+               return;
+            }
+            this.handleException(e);
+         });
+   }
+
+
+   /*******************************************************************************
+    * Fetch the data for a specific widget, doing a GET.
+    * This HTTP method is being deprecated for rendering widgets, due to query
+    * string being too limited in size, compared to the relative unlimited size of
+    * POST body - but this method is here for a backward-compatibility later - in
+    * case hitting a backend server that 404'ed for the POST call.
+    *******************************************************************************/
+   private async getWidget(widgetName: string, urlParams?: string, overrideAbortName?: string): Promise<any>
+   {
+      const abortName = overrideAbortName ?? widgetName;
+
+      let url = `/widget/${encodeURIComponent(widgetName)}`;
+      if(urlParams)
+      {
+         url += `?${urlParams}`;
+      }
+
+      /////////////////////////////////////////
+      // keep track of this widget's request //
+      /////////////////////////////////////////
+      const controller = new AbortController();
+      const signal = controller.signal;
+      QController.widgetAbortControllerMap.set(abortName, controller);
 
       return this.axiosInstance
          .get(url, {signal})
@@ -968,7 +1056,7 @@ export class QController
             ///////////////////////////////////////////////////
             // make sure to clear out the request controller //
             ///////////////////////////////////////////////////
-            QController.widgetAbortControllerMap.set(widgetName, null);
+            QController.widgetAbortControllerMap.set(abortName, null);
             return response.data;
          })
          .catch((e: any) =>
@@ -981,6 +1069,7 @@ export class QController
             this.handleException(e);
          });
    }
+
 
 
    /***************************************************************************
@@ -1082,7 +1171,7 @@ export class QController
          queryComponents.push(`useCase=${encodeURIComponent(useCase)}`);
       }
 
-      if (searchTerm !== "")
+      if (processUUID !== "")
       {
          queryComponents.push(`processUUID=${encodeURIComponent(processUUID)}`);
       }

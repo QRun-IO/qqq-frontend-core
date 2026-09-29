@@ -1,5 +1,7 @@
 *.iml
 .env
+.yalc
+yalc*
 
 node_modules
 coverage
@@ -11,3 +13,7 @@ lib
 
 **/.DS_Store
 *.iml
+
+# Claude Code local settings
+.claude/
+

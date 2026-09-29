@@ -20,29 +20,32 @@
  */
 
 /*******************************************************************************
- ** Define a filter order by in a QQQ instance.
+ ** Meta-Data to define Collapsible state, e.g., for a section or widget
  **
  *******************************************************************************/
-export class QFilterOrderBy
+export class Collapsible
 {
-   fieldName: string;
-   isAscending?: boolean;
+   isCollapsible: boolean;
+   initiallyOpen: boolean;
 
-   constructor(fieldName: string, isAscending?: boolean)
+   constructor(object: any)
    {
-      this.fieldName = fieldName;
-      this.isAscending = isAscending;
+      ////////////////////////////////////////////////////////////////////////////
+      // use value === true to let undefined (or any other) values become false //
+      ////////////////////////////////////////////////////////////////////////////
+      this.isCollapsible = object.isCollapsible === true;
+      this.initiallyOpen = object.initiallyOpen === true;
    }
+
 
    /***************************************************************************
     *
     ***************************************************************************/
-   public clone(): QFilterOrderBy
+   public clone(): Collapsible
    {
-      const clone = new QFilterOrderBy(
-         this.fieldName,
-         this.isAscending
-      );
+      const clone = new Collapsible({
+         ...this
+      });
       return (clone);
    }
 }

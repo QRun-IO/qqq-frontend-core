@@ -37,4 +37,15 @@ export class QJoinMetaData
       this.leftTable = object.leftTable;
       this.rightTable = object.rightTable;
    }
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QJoinMetaData
+   {
+      const clone = new QJoinMetaData({
+         ...this
+      });
+      return (clone);
+   }
 }

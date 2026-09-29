@@ -31,6 +31,7 @@ export class QAppSection
    label: string;
    icon?: QIcon;
    tables?: string[];
+   apps?: string[];
    processes?: string[];
    reports?: string[];
 
@@ -53,6 +54,10 @@ export class QAppSection
       if (object.tables)
       {
          this.tables = object.tables;
+      }
+      if (object.apps)
+      {
+         this.apps = object.apps;
       }
    }
 }

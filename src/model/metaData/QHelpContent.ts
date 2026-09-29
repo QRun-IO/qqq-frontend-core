@@ -105,4 +105,26 @@ export class QHelpContent
       return (rs);
    }
 
+
+   /***************************************************************************
+    *
+    ***************************************************************************/
+   public clone(): QHelpContent
+   {
+      const rolesClone = new Set<string>();
+      this.roles.forEach((role) =>
+      {
+         rolesClone.add(role);
+      });
+
+      const clone = new QHelpContent({...this});
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // sets don't quite work as expected for this kind of clone, so copy manually //
+      ////////////////////////////////////////////////////////////////////////////////
+      clone.roles = rolesClone;
+
+      return (clone);
+   }
+
 }
