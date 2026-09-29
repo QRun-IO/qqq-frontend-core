@@ -1,6 +1,6 @@
 # npm publishing
 
-CircleCI publishes `@qrunio/qqq-frontend-core` with npm Trusted Publishing using `kingsrook/qqq-orb@0.6.7` and `cimg/node:24.21`. In the package Settings on npmjs.com, add a **CircleCI** trusted publisher with the values below and explicitly allow **npm publish** (the staged-only default does not run this pipeline). Existing workflow branch filters and dist-tags remain in place.
+CircleCI publishes `@qrunio/qqq-frontend-core` with npm Trusted Publishing using `kingsrook/qqq-orb@0.6.8` and `cimg/node:24.21`. In the package Settings on npmjs.com, add a **CircleCI** trusted publisher with the values below and explicitly allow **npm publish** (the staged-only default does not run this pipeline). Existing workflow branch filters and dist-tags remain in place.
 
 | npm field | Value |
 | --- | --- |
