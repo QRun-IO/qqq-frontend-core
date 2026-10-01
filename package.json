@@ -15,16 +15,17 @@
       "yalc-watch": "yalc-watch"
    },
    "dependencies": {
-      "axios": "0.33.0",
+      "axios": "0.34.0",
       "form-data": "4.0.6"
    },
    "keywords": [],
    "files": [
       "lib",
-      "package.json"
+      "package.json",
+      "NOTICE"
    ],
    "author": "Kingsrook LLC",
-   "license": "ISC",
+   "license": "Apache-2.0",
    "repository": {
       "type": "git",
       "url": "https://github.com/QRun-IO/qqq-frontend-core"

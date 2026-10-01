@@ -152,4 +152,4 @@ Submit issues and PRs to the [main QQQ repository](https://github.com/QRun-IO/qq
 
 ## License
 
-AGPL-3.0
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
