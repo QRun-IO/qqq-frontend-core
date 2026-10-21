@@ -1,57 +1,14 @@
 version: 2.1
-
+setup: true
 orbs:
-  qqq-orb: kingsrook/qqq-orb@0.3.1
-
+  qqq-orb: kingsrook/qqq-orb@0.8
 workflows:
-
-  test_only:
+  setup:
     jobs:
-      - qqq-orb/node_test_only:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
-          filters:
-            branches:
-              ignore: /(develop|main|release/.*|hotfix/.*|integration.*)/
-            tags:
-              only: []  
-
-  publish_snapshot:
-    jobs:
-      - qqq-orb/node_publish:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
-          branch_type: snapshot
-          filters:
-            branches:
-              only:
-                - develop
-
-  publish_release_candidate:
-    jobs:
-      - qqq-orb/node_publish:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
-          branch_type: release_candidate
-          filters:
-            branches:
-              only:
-                - /release\/.*/
-
-  publish_release:
-    jobs:
-      - qqq-orb/node_publish:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
-          branch_type: release
-          filters:
-            branches:
-              only: [ main ]
-            tags:
-              only: [ /v.*/ ]
-
-  publish_hotfix_release:
-    jobs:
-      - qqq-orb/node_publish:
-          context: [ qqq-maven-registry-credentials, build-qqq-sample-app ]
-          branch_type: hotfix
-          filters:
-            branches:
-              only:
-                - /hotfix\/.*/
+    - qqq-orb/generate_pipeline:
+        orb_version: '0.8'
+        filters:
+          branches:
+            ignore: automation/qbit-rc-pending
+          tags:
+            only: /.*/
