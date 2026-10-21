@@ -1,0 +1,4 @@
+profile: frontend-core
+orb_version: 0.7.4
+default_branch: develop
+node_version: '24.21'
