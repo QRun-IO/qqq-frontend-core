@@ -1,6 +1,13 @@
 # npm publishing
 
-CircleCI publishes `@qrunio/qqq-frontend-core` with npm Trusted Publishing using `kingsrook/qqq-orb@0.6.8` and `cimg/node:24.21`. In the package Settings on npmjs.com, add a **CircleCI** trusted publisher with the values below and explicitly allow **npm publish** (the staged-only default does not run this pipeline). Existing workflow branch filters and dist-tags remain in place.
+CircleCI publishes `@qrunio/qqq-frontend-core` with npm Trusted Publishing through the shared `frontend-core` profile in `.qqq-ci.yml`. The canonical caller tracks `kingsrook/qqq-orb@0.8` and uses `cimg/node:24.21`. Publishing logic lives in the orb, not in a repository-specific workflow. In the package Settings on npmjs.com, add a **CircleCI** trusted publisher with the values below and explicitly allow **npm publish** (the staged-only default does not run this pipeline).
+
+Develop snapshots use build-specific versions such as `0.40.28-SNAPSHOT.1234`
+and the npm `snapshot` dist-tag. The version is calculated in the publishing
+workspace; the job does not push a version-only `[skip ci]` commit back to
+`develop`. Required checks therefore stay attached to the source head being
+published. See [version management](version-management.md) and the
+[shared orb policy](https://github.com/QRun-IO/qqq-orb/blob/main/docs/GENERATED-PIPELINES.md#node-snapshot-versions).
 
 | npm field | Value |
 | --- | --- |
