@@ -1,0 +1,7 @@
+name: Local Node qualification
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  shared:
+    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/node.yaml@2868ec75885f36d33e2980aaed9391a42137d032
