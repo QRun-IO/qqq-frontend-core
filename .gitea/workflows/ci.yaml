@@ -4,4 +4,6 @@ permissions:
   contents: read
 jobs:
   shared:
-    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/node.yaml@2868ec75885f36d33e2980aaed9391a42137d032
+    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/node.yaml@bf05f1817f66b133e6e793992bd80d52ebaa4e61
+    with:
+      build-script: prepublishOnly
