@@ -4,4 +4,4 @@ permissions:
   contents: read
 jobs:
   shared:
-    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/npm-artifact.yaml@d597395ae445ba058c7a256101c9a74e29088628
+    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/npm-artifact.yaml@024bb40fd83f072df26c87cea436072e866df18e
