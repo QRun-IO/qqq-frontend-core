@@ -2,14 +2,15 @@
    "name": "@qrunio/qqq-frontend-core",
    "version": "0.40.27-SNAPSHOT",
    "description": "",
-   "main": "qqq-frontend-core.js",
-   "module": "lib/qqq-frontend-core.esm.js",
+   "main": "lib-cjs/qqq-frontend-core.js",
+   "module": "lib/qqq-frontend-core.js",
+   "types": "lib/qqq-frontend-core.d.ts",
    "scripts": {
       "delete-modules": "rm -rf node_modules; rm package-lock.json",
       "lint": "eslint . --ext .ts",
       "npm-install": "npm install",
       "clean-and-install": "npm ci && npm run prepublishOnly",
-      "prepublishOnly": "rm -rf lib/ && tsc -p ./ --outDir lib/",
+      "prepublishOnly": "node scripts/clean-build.cjs && tsc -p ./ --outDir lib/ && tsc -p ./ --module commonjs --outDir lib-cjs/",
       "test": "jest",
       "yalc-push": "npm run prepublishOnly && yalc push --private",
       "yalc-watch": "yalc-watch"
@@ -21,6 +22,7 @@
    "keywords": [],
    "files": [
       "lib",
+      "lib-cjs",
       "package.json",
       "NOTICE"
    ],

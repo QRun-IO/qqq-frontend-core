@@ -17,3 +17,4 @@ lib
 # Claude Code local settings
 .claude/
 
+lib-cjs
