@@ -23,7 +23,7 @@ import {QFieldMetaData} from "./model/metaData/QFieldMetaData";
 import {QFieldType} from "./model/metaData/QFieldType";
 import {QTableMetaData} from "./model/metaData/QTableMetaData";
 
-module.exports = {
+export {
    QController,
    QTableMetaData,
    QFieldMetaData,
