@@ -1,0 +1,37 @@
+name: QRun original Node release
+on:
+  push:
+    branches: ['**']
+  create:
+  workflow_dispatch:
+# Thin caller default stays READ.
+permissions:
+  contents: read
+  actions: read
+jobs:
+  release:
+    # Tag creation bypasses the forge's [skip ci] push suppression. Push is branch-only, so a tag has one route.
+    if: ${{ github.event_name != 'create' || (github.event.ref_type == 'tag' && github.event.ref == github.ref && (startsWith(github.ref, 'refs/tags/publish') || startsWith(github.ref, 'refs/tags/v'))) }}
+    # Ceiling only: the callee's isolated version and cleanup jobs declare their own contents: write; every other callee job is READ.
+    # No NPM_TOKEN, no OIDC, no registry secret is passed. Not rolled out to any caller.
+    permissions:
+      contents: write
+      actions: read
+    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/qrun-node-release.yaml@qrun-release-v1
+    with:
+      runner: linux-small
+  postpublish:
+    needs: release
+    if: ${{ success() && needs.release.outputs.computed-version != '' }}
+    permissions:
+      contents: write
+      actions: read
+    uses: self:KofTwentyTwo/platform-ci/.gitea/workflows/qrun-node-finalize.yaml@qrun-release-v1
+    with:
+      runner: linux-small
+      mode: ${{ needs.release.outputs.mode }}
+      version: ${{ needs.release.outputs.computed-version }}
+      dist-tag: ${{ needs.release.outputs.dist-tag }}
+      built-commit: ${{ needs.release.outputs.built-commit }}
+      build-job-id: ${{ needs.release.outputs.build-job-id }}
+      run-attempt: ${{ needs.release.outputs.run-attempt }}
