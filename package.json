@@ -1,6 +1,6 @@
 {
    "name": "@qrunio/qqq-frontend-core",
-   "version": "0.40.27-SNAPSHOT",
+   "version": "0.40.27-RC.1",
    "description": "",
    "main": "lib-cjs/qqq-frontend-core.js",
    "module": "lib/qqq-frontend-core.js",
@@ -33,7 +33,7 @@
       "url": "https://github.com/QRun-IO/qqq-frontend-core"
    },
    "publishConfig": {
-      "registry": "https://registry.npmjs.org/"
+      "registry": "https://git.kof22.com/api/packages/QRun-IO/npm/"
    },
    "devDependencies": {
       "@types/jest": "^27.0.2",

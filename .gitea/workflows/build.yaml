@@ -3,7 +3,8 @@ on:
   push:
 jobs:
   node:
-    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/node.yaml@v1
+    # @main until the owner moves ci-workflows v1 onto the publishing node.yaml; then back to @v1.
+    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/node.yaml@main
     secrets: inherit
     with:
       node-version: '24'
@@ -11,3 +12,6 @@ jobs:
         npm run lint
         npm test
         npm run prepublishOnly
+      # A vX.Y.Z[-RC.N] tag equal to package.json publishes @qrunio/qqq-frontend-core to the
+      # QRun-IO Gitea npm registry (RC -> dist-tag next). Branches only verify.
+      publish: true
