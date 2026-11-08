@@ -35,6 +35,17 @@ If you want a ready-to-use admin UI, use [qqq-frontend-material-dashboard](https
 npm install @qrunio/qqq-frontend-core
 ```
 
+Releases are published to the QRun-IO Gitea npm registry (release candidates under the `next`
+dist-tag). Point the scope there in `.npmrc`:
+
+```ini
+@qrunio:registry=https://git.kof22.com/api/packages/QRun-IO/npm/
+//git.kof22.com/api/packages/QRun-IO/npm/:_authToken=${GITEA_TOKEN}
+```
+
+To release: set the version (`npm version 0.41.0-RC.1 --no-git-tag-version`), merge, and tag the
+merge commit `v<version>`; CI verifies the tag equals `package.json`, runs the checks and publishes.
+
 ```typescript
 import { QController } from '@qrunio/qqq-frontend-core';
 
