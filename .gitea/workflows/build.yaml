@@ -4,7 +4,7 @@ on:
 jobs:
   node:
     # @main until the owner moves ci-workflows v1 onto the publishing node.yaml; then back to @v1.
-    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/node.yaml@main
+    uses: self:KofTwentyTwo/ci-workflows/.gitea/workflows/node.yaml@v1
     secrets: inherit
     with:
       node-version: '24'
